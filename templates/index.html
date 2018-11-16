@@ -1,0 +1,29 @@
+<html>
+<head>
+	<title>Home</title>
+	<script type="text/javascript" src="http://cdn.webix.com/edge/webix.js"></script>
+	<link type="text/css" rel="stylesheet" href="http://cdn.webix.com/edge/skins/compact.css">
+	<script src="https://cdn.webix.com/components/edge/ckeditor/ckeditor.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+    	.row {
+		    display: flex;
+		}
+
+		.column {
+		    flex: 20%;
+		}
+
+		.column1 {
+			flex: 100%;
+		}
+    </style>
+</head>
+<body>
+	<script type="text/javascript" src="./static/ui.js"></script>
+	<div class="row">
+		<div id="main_layout" class="column1" style="height:100%"></div>
+		<div id="plotly_div" class="column" style="height:100%" align="left"></div>	
+	</div>
+</body>
+</html>

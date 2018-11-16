@@ -1,0 +1,14 @@
+genetic_profile_id	genetic_profile_name	genetic_profile_description	cancer_study_id	genetic_alteration_type	show_profile_in_analysis_tab
+gbm_tcga_rppa	Protein expression (RPPA)	Protein expression measured by reverse-phase protein array	1209	PROTEIN_LEVEL	false
+gbm_tcga_rppa_Zscores	Protein expression Z-scores (RPPA)	Protein expression, measured by reverse-phase protein array, Z-scores	1209	PROTEIN_LEVEL	true
+gbm_tcga_gistic	Putative copy-number alterations from GISTIC	Putative copy-number calls on 577 cases determined using GISTIC 2.0. Values: -2 = homozygous deletion; -1 = hemizygous deletion; 0 = neutral / no change; 1 = gain; 2 = high level amplification.	1209	COPY_NUMBER_ALTERATION	true
+gbm_tcga_mrna_U133	mRNA expression (U133 microarray only)	mRNA expression data from the Affymetrix U133 microarray.	1209	MRNA_EXPRESSION	false
+gbm_tcga_mrna_U133_Zscores	mRNA Expression z-Scores (U133 microarray only)	mRNA z-Scores  (U133 microarray only) compared to the expression distribution of each gene tumors that are diploid for this gene.	1209	MRNA_EXPRESSION	true
+gbm_tcga_mrna	mRNA expression (microarray)	Expression levels for 17155 genes in 411 gbm cases (Agilent microarray).	1209	MRNA_EXPRESSION	false
+gbm_tcga_mrna_median_Zscores	mRNA Expression z-Scores (microarray)	mRNA z-Scores (Agilent microarray) compared to the expression distribution of each gene tumors that are diploid for this gene.	1209	MRNA_EXPRESSION	true
+gbm_tcga_rna_seq_v2_mrna	mRNA expression (RNA Seq V2 RSEM)	Expression levels for 20532 genes in 171 gbm cases (RNA Seq V2 RSEM).	1209	MRNA_EXPRESSION	false
+gbm_tcga_rna_seq_v2_mrna_median_Zscores	mRNA Expression z-Scores (RNA Seq V2 RSEM)	mRNA z-Scores (RNA Seq V2 RSEM) compared to the expression distribution of each gene tumors that are diploid for this gene.	1209	MRNA_EXPRESSION	true
+gbm_tcga_linear_CNA	Relative linear copy-number values	Relative linear copy-number values for each gene (from Affymetrix SNP6).	1209	COPY_NUMBER_ALTERATION	false
+gbm_tcga_methylation_hm27	Methylation (HM27)	Methylation (HM27) beta-values for genes in 285 cases. For genes with multiple methylation probes, the probe most anti-correlated with expression.	1209	METHYLATION	false
+gbm_tcga_methylation_hm450	Methylation (HM450)	Methylation (HM450) beta-values for genes in 155 cases. For genes with multiple methylation probes, the probe most anti-correlated with expression.	1209	METHYLATION	false
+gbm_tcga_mutations	Mutations	Mutation data from whole exome sequencing. Mutation packager: GBM/20160128/gdac.broadinstitute.org_GBM.Mutation_Packager_Raw_Calls.Level_3.2016012800.0.0.tar.gz.	1209	MUTATION_EXTENDED	true
