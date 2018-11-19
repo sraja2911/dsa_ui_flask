@@ -22,10 +22,9 @@ fetchCbioportal = module_from_file("CBioPortal", "./cgat_app/CBioPortal.py") """
 
 app = Flask(__name__)
 
+# def homepage():
+#     return """<h1>Hello world!</h1>"""
 @app.route('/')
-def homepage():
-    return """<h1>Hello world!</h1>"""
-
 @app.route('/dsa_ui')
 def dsaoncoprintjs_page():
     return render_template('index.html', tile='Home')
