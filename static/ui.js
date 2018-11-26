@@ -106,13 +106,9 @@ function single_select(item) {
                 copy_number_segments: function() {
                     copy_number_segments(patientID);                    
                     $(this).dialog("close");
-                },
-                discrete_copynumber_alterations: function() {
-                    discrete_copynumber_alterations();                    
-                    $(this).dialog("close");
-                },                
-                Other_cBioportal: function() {
-                    Other_cBioportal();
+                },                                
+                generic_cBioportal: function() {
+                    generic_cBioportal();
                     $(this).dialog("close");
                 }
 
@@ -403,7 +399,7 @@ function Clinical_Events(patientID){
         }
 }
 
-function Other_cBioportal(){
+function generic_cBioportal(){
     $("#othercbiodialog").dialog({
             autoOpen: true,
             buttons: {
@@ -422,12 +418,15 @@ function Other_cBioportal(){
                 get_all_gene_panel:function(){
                     get_all_gene_panel();
                     $(this).dialog("close");
-                },                
-                Other_cBioportal: function() {
-                    alert("Maybe!");
+                },
+                molecular_profiles:function(){
+                    molecular_profiles();
+                    $(this).dialog("close");
+                },
+                discrete_copynumber_alterations: function() {
+                    discrete_copynumber_alterations();                    
                     $(this).dialog("close");
                 }
-
             },
             width: "400px"
 
@@ -572,15 +571,25 @@ function clinical_attributes_studyID(){
 
 function copy_number_segments(patientID){
 
-    filename = patientID +"_Copy_number_Segments"
-
-    var studyID = prompt("Please enter the Cancer StudyID", "gbm_tcga")
+    var studyID = prompt("Please enter the Cancer StudyID", "acc_tcga")
 
     if (studyID == null || studyID == "") {
         txt = "User cancelled the prompt.";
     }else {
         studyID = studyID;
     }    
+
+    var sampleID = prompt("Please enter the study sample ID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
+
+    if (studyID == null) {
+        txt = "User cancelled the prompt.";
+    }else if (studyID == "") {
+        studyID = patientID
+    }else {
+        studyID = studyID;
+    }
+
+    filename = patientID +"_Copy_number_Segments"
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+patientID+"/copy-number-segments?projection=SUMMARY&pageSize=20000&pageNumber=0&direction=ASC";
 
@@ -765,4 +774,69 @@ function gene_panelID(){
             });    
         }
 
+}
+
+function molecular_profiles(){
+
+    var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_rna_seq_v2_mrna")
+
+    if (molecularProfileId == null || molecularProfileId == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        molecularProfileId = molecularProfileId;
+    }
+
+    var sampleListId = prompt("Please enter Study Sample List ID", "acc_tcga_all")
+
+    if (sampleListId == null || sampleListId == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        sampleListId = sampleListId;
+    }
+
+    var entrezGeneId = prompt("Please enter numeric Entrez Gene Id", "1")
+
+    if (entrezGeneId == null || entrezGeneId == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        entrezGeneId = entrezGeneId;
+    }    
+
+    filename = "MolecularProfiles_4_"+ molecularProfileId +"_"+ sampleListId +"_"+ entrezGeneId
+
+    downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/molecular-data?sampleListId="+sampleListId+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
 }
