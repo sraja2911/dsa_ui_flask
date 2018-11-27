@@ -124,6 +124,14 @@ function single_select(item) {
                 sampleList_in_study: function() {
                     sampleList_in_study();                    
                     $(this).dialog("close");
+                },                
+                mutated_genes_in_study: function() {
+                    mutated_genes_in_study();                    
+                    $(this).dialog("close");
+                },
+                copynumberregions_in_study: function() {
+                    copynumberregions_in_study();                    
+                    $(this).dialog("close");
                 },
                 all_samples_in_study: function() {
                     all_samples_in_study();                    
@@ -1381,6 +1389,104 @@ function single_study(){
     filename = "single_study_"+ cancerstudyID  
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID;
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function copynumberregions_in_study(){
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "copynumberregions_in_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significant-copy-number-regions?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function mutated_genes_in_study(){
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "mutated_genes_in_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significantly-mutated-genes?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {

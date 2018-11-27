@@ -1,0 +1,15 @@
+﻿uniquePatientKey,studyId,patientId,eventType,attributes,startNumberOfDaysSinceDiagnosis
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","SPECIMEN",[{"key":"SURGERY","value":"Astro II Initial"},{"key":"SAMPLE_ID","value":"P01_Pri"}],124
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","SPECIMEN",[{"key":"SURGERY","value":"Glioblastoma"},{"key":"SAMPLE_ID","value":"P01_Rec"}],1063
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","STATUS",[{"key":"STATUS","value":"radiographic_progression"}],580
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","STATUS",[{"key":"STATUS","value":"radiographic_progression"}],1041
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","STATUS",[{"key":"STATUS","value":"radiographic_progression"}],1377
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","SURGERY",[{"key":"EVENT_TYPE_DETAILED","value":"Astro II biopsy"}],0
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","SURGERY",[{"key":"EVENT_TYPE_DETAILED","value":"Astro II Initial"}],124
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","SURGERY",[{"key":"EVENT_TYPE_DETAILED","value":"GBM Recurrence1"}],1063
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","SURGERY",[{"key":"EVENT_TYPE_DETAILED","value":"GBM Recurrence2"}],1391
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","TREATMENT",[{"key":"SUBTYPE","value":"Chemotherapy"},{"key":"AGENT","value":"TMZ"},{"key":"TREATMENT_TYPE","value":"Medical Therapy"}],611
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","TREATMENT",[{"key":"AGENT","value":"TMZ + accutane"},{"key":"TREATMENT_TYPE","value":"Medical Therapy"}],977
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","TREATMENT",[{"key":"AGENT","value":"TMZ + thalidomide"},{"key":"TREATMENT_TYPE","value":"Medical Therapy"}],1007
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","TREATMENT",[{"key":"SUBTYPE","value":"XRT"},{"key":"TREATMENT_TYPE","value":"Radiation Therapy"}],1088
+"UDAxOmxnZ191Y3NmXzIwMTQ","lgg_ucsf_2014","P01","TREATMENT",[{"key":"AGENT","value":"CCNU + thalidomide"},{"key":"TREATMENT_TYPE","value":"Medical Therapy"}],1160
