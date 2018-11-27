@@ -89,32 +89,60 @@ function single_select(item) {
         sliderTemplate = "<div>SlideName:#name#<br>SlideID:#id#<br>StainTypes:#meta.Stain_Types#<br>RBC:#meta.Blood_Red_Percentage#<br>Grade:#meta.Cancer_Grading#<br> " +
            "WBC:#meta.White_Blood_Cell_Count# </div>"
         patientID = item.name.substring(0,12);
-        studyID=Cancer_Grading.substring(0,3);
-
-        // Multiple cBioPortal Choices  
+        studyID=Cancer_Grading.substring(0,3);      
         $("#maindialog").dialog({
             autoOpen: true,
             buttons: {
-                Clinical_Data: function() {
-                    Clinical_Data(patientID);                    
+                clinical_Data: function() {
+                    clinical_Data(patientID);                    
                     $(this).dialog("close");
                 },
-                Clinical_Events: function() {
-                    Clinical_Events(patientID);
+                clinical_Events: function() {
+                    clinical_Events(patientID);
                     $(this).dialog("close");
                 },
                 copy_number_segments: function() {
                     copy_number_segments(patientID);                    
                     $(this).dialog("close");
-                },                                
+                },
+                molecular_data:function(){
+                    molecular_data();
+                    $(this).dialog("close");
+                },
+                all_patients_in_study:function(){
+                    all_patients_in_study();
+                    $(this).dialog("close");
+                },                
+                patient_in_study:function(){
+                    patient_in_study(patientID);
+                    $(this).dialog("close");
+                },
+                cBio_SamplesList: function() {
+                    cBio_SamplesList();                    
+                    $(this).dialog("close");
+                },
+                sampleList_in_study: function() {
+                    sampleList_in_study();                    
+                    $(this).dialog("close");
+                },
+                all_samples_in_study: function() {
+                    all_samples_in_study();                    
+                    $(this).dialog("close");
+                },
+                all_available_studies: function() {
+                    all_available_studies();                    
+                    $(this).dialog("close");
+                },
+                single_study: function() {
+                    single_study();                    
+                    $(this).dialog("close");
+                },  
                 generic_cBioportal: function() {
                     generic_cBioportal();
                     $(this).dialog("close");
                 }
-
             },
             width: "600px"
-
         });
     }
     $$("sliderdata").define("template", sliderTemplate);
@@ -293,7 +321,7 @@ webix.ready(function() {
     })
 });
 
-function Clinical_Data(patientID){     
+function clinical_Data(patientID){     
 
     filename = patientID +"_Clinical_Data"
 
@@ -342,7 +370,7 @@ function Clinical_Data(patientID){
         }
 }
 
-function Clinical_Events(patientID){     
+function clinical_Events(patientID){     
     
     var studyID = prompt("Please enter the Cancer StudyID", "lgg_ucsf_2014")
 
@@ -352,17 +380,19 @@ function Clinical_Events(patientID){
         studyID = studyID;
     }
 
-    var patientID = prompt("Please enter the PatientID", "P01")
+    var sampleID = prompt("Please enter the PatientID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
 
-    if (patientID == null || patientID == "") {
+    if (sampleID == null) {
         txt = "User cancelled the prompt.";
+    }else if (sampleID == "") {
+        sampleID = patientID
     }else {
-        patientID = patientID;
+        sampleID = sampleID;
     }
 
-    filename = "Clinical_Events_4_"+ patientID + "_" + studyID;
+    filename = "Clinical_Events_4_"+ sampleID + "_" + studyID;
 
-    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/patients/"+patientID+"/clinical-events?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/patients/"+sampleID+"/clinical-events?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
@@ -418,9 +448,21 @@ function generic_cBioportal(){
                 get_all_gene_panel:function(){
                     get_all_gene_panel();
                     $(this).dialog("close");
+                },                
+                molecular_profiles_all:function(){
+                    molecular_profiles_all();
+                    $(this).dialog("close");
                 },
-                molecular_profiles:function(){
-                    molecular_profiles();
+                molecular_profile_id:function(){
+                    molecular_profiles_id();
+                    $(this).dialog("close");
+                },
+                molecular_profiles_4_cancerstudyid:function(){
+                    molecular_profiles_4_cancerstudyid()();
+                    $(this).dialog("close");
+                },
+                molecular_mutations_profiles_4_cancerstudyid:function(){
+                    molecular_mutations_profiles_4_cancerstudyid()();
                     $(this).dialog("close");
                 },
                 discrete_copynumber_alterations: function() {
@@ -428,7 +470,7 @@ function generic_cBioportal(){
                     $(this).dialog("close");
                 }
             },
-            width: "400px"
+            width: "500px"
 
         });    
 }
@@ -776,7 +818,7 @@ function gene_panelID(){
 
 }
 
-function molecular_profiles(){
+function molecular_data(){
 
     var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_rna_seq_v2_mrna")
 
@@ -805,6 +847,540 @@ function molecular_profiles(){
     filename = "MolecularProfiles_4_"+ molecularProfileId +"_"+ sampleListId +"_"+ entrezGeneId
 
     downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/molecular-data?sampleListId="+sampleListId+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function molecular_profiles_all(){
+
+    filename = "MolecularProfiles_all"
+
+    downloadurl = "http://www.cbioportal.org/api/molecular-profiles?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function molecular_profiles_id(){
+
+    var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_mutations")
+
+    if (molecularProfileId == null || molecularProfileId == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        molecularProfileId = molecularProfileId;
+    }
+
+    filename = "MolecularProfiles_4_"+ molecularProfileId 
+
+    downloadurl = "http://www.cbioportal.org/api/molecular-profiles/" + molecularProfileId;
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function molecular_profiles_4_cancerstudyid(){
+
+    var cancerstudyID = prompt("Please enter Cancer Study ID for the molecular profiles", "acc_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+
+    filename = "MolecularProfiles_4_Cancerstudy_"+ cancerstudyID 
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/molecular-profiles?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function molecular_mutations_profiles_4_cancerstudyid(){
+
+    var molecularProfileID = prompt("Please enter molecular profilesID ", "acc_tcga_mutations")
+
+    if (molecularProfileID == null || molecularProfileID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        molecularProfileID = molecularProfileID;
+    }
+
+    var cancerstudyID = prompt("Please enter Cancer Study ID for the mutations profiles", "acc_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+
+    filename = "Mutations_in_MolecularProfile_4_Cancerstudy_"+ cancerstudyID +"_molecularprofiles_" + molecularProfileId
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/molecular-profiles?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function all_patients_in_study(){
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "All_patients_4_Cancerstudy_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/patients?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function patient_in_study(patientID){
+
+    var sampleID = prompt("Please enter the study patient ID or leave blank for selected Patient ID", "TCGA-02-0001")
+
+    if (sampleID == null) {
+        txt = "User cancelled the prompt.";
+    }else if (sampleID == "") {
+        sampleID = patientID
+    }else {
+        sampleID = sampleID;
+    }
+
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "patient_in_Cancerstudy_"+ sampleID
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+ cancerstudyID+ "/patients/"+ sampleID;
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function cBio_SamplesList(){
+
+    filename = "cBioSamplesList" 
+
+    downloadurl = "http://www.cbioportal.org/api/sample-lists?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function sampleList_in_study(){
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga_all")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "sampleList_in_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/sample-lists/"+cancerstudyID;
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function all_samples_in_study(){
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga_all")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "all_samples_in_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/sample-lists/"+cancerstudyID+"/sample-ids";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function all_available_studies(){
+
+    filename = "all_available_studies" 
+
+    downloadurl = "http://www.cbioportal.org/api/studies?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function single_study(){
+
+    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+    if (cancerstudyID == null || cancerstudyID == "") {
+        txt = "User cancelled the prompt.";
+    }else {
+        cancerstudyID = cancerstudyID;
+    }
+    
+    filename = "single_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID;
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
