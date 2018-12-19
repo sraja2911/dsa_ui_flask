@@ -217,11 +217,6 @@ function multi_select(ar_selected) {
         { x: name, y: wb_count, mode: 'lines+markers', name: "WBC Count" }
     ]
     
-    // $$("caseListTable").clearAll();
-    // $$("caseListTable").parse(slideText);
-    // $$("caseListTable").refresh();
-
-    
     Plotly.newPlot("plotly_div", data, layout);
 }
 
@@ -251,11 +246,6 @@ var dataViewControls = {
     ]
 }
 
-// meta.Blood_Red_Percentage;
-//             var White_Blood_Cell_Count = item.meta.White_Blood_Cell_Count
-// sliderTemplate = "<div>SlideName:#name#<br>SlideID:#id#<br>StainTypes:#Stain_Types#<br>RBC:#Blood_Red_Percentage#<br>Grade:#Cancer_Grading#<br> " +
-//            "WBC:#White_Blood_Cell_Count# </div>"
-
 webix.ready(function() {
     webix.ui({
         container: "main_layout",
@@ -276,18 +266,6 @@ webix.ready(function() {
                     },
                     { view: "resizer" },
                     { view: "template", content: "plotly_div" },
-                    // {
-                    //     view:"dataview",
-                    //     id:"caseListTable",
-                    //     height:800,                        
-                    //     type:{
-                    //       width: 261,
-                    //       height: 90,
-                    //       template:"<div>SlideName:#name#<br>SlideID:#id#<br>StainTypes:#meta.Stain_Types#<br>RBC:#meta.Blood_Red_Percentage#<br>Grade:#meta.Cancer_Grading#<br> " +
-                    //         "WBC:#meta.White_Blood_Cell_Count# </div>"
-                    //     },
-                         
-                    // }
                     { view:"datatable", 
                       id:"caseListTable", 
                       on:{
@@ -318,13 +296,6 @@ webix.ready(function() {
                     }
                 ]
             },
-            // {
-            //     view: "template",
-            //     template: "Footer",
-            //     id : "Footer",
-            //     height : 250,
-            //     width : 261
-            // }           
         ]
     })
 });
