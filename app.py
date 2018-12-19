@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 @app.route('/dsa_ui')
-def dsaoncoprintjs_page():
+def dsawebixjs_page():
     return render_template('index.html', tile='Home')
 
 @app.errorhandler(500)

@@ -470,12 +470,15 @@ function generic_cBioportal(){
                     $(this).dialog("close");
                 },
                 molecular_mutations_profiles_4_cancerstudyid:function(){
-                    molecular_mutations_profiles_4_cancerstudyid()();
+                    molecular_mutations_profiles_4_cancerstudyid();
                     $(this).dialog("close");
                 },
                 discrete_copynumber_alterations: function() {
                     discrete_copynumber_alterations();                    
                     $(this).dialog("close");
+                },
+                previous_menu: function() {
+                    history.back();                     
                 }
             },
             width: "500px"
@@ -1032,26 +1035,36 @@ function molecular_profiles_4_cancerstudyid(){
 
 function molecular_mutations_profiles_4_cancerstudyid(){
 
-    var molecularProfileID = prompt("Please enter molecular profilesID ", "acc_tcga_mutations")
+    try{
+        var molecularProfileId = prompt("Please enter molecular profilesID ", "acc_tcga_mutations")
 
-    if (molecularProfileID == null || molecularProfileID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        molecularProfileID = molecularProfileID;
+        if (molecularProfileId == null || molecularProfileId == "") {
+            throw new Error("User cancelled the prompt.");            
+        }else {
+            molecularProfileId = molecularProfileId;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
-    var cancerstudyID = prompt("Please enter Cancer Study ID for the mutations profiles", "acc_tcga")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer Study ID for the mutations profiles", "acc_tcga")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");            
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
+    }
+    catch(e){
+        alert(e.message);
     }
 
     filename = "Mutations_in_MolecularProfile_4_Cancerstudy_"+ cancerstudyID +"_molecularprofiles_" + molecularProfileId
 
-    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/molecular-profiles?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
-
+    downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/mutations?sampleListId="+cancerstudyID+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+                  
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
         var JSONData = $.getJSON(downloadurl, function(data) {
@@ -1059,7 +1072,8 @@ function molecular_mutations_profiles_4_cancerstudyid(){
             console.log(items);
             const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
             const header = Object.keys(items[0]);
-            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
             csv.unshift(header.join(','));
             csv = csv.join('\r\n');
 
