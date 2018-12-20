@@ -304,13 +304,19 @@ function clinical_Data(patientID){
 
     filename = patientID +"_Clinical_Data"
 
-    var studyID = prompt("Please enter the Cancer StudyID", "gbm_tcga")
+    try{
+        var studyID = prompt("Please enter the Cancer StudyID", "gbm_tcga")
 
-    if (studyID == null || studyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        studyID = studyID;
-    }    
+        if (studyID == null || studyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            studyID = studyID;
+        }
+        
+    }
+    catch(e){
+        alert(e.message);
+    }
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/patients/"+patientID+"/clinical-data?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
 
@@ -351,23 +357,34 @@ function clinical_Data(patientID){
 
 function clinical_Events(patientID){     
     
-    var studyID = prompt("Please enter the Cancer StudyID", "lgg_ucsf_2014")
+    try{
+        var studyID = prompt("Please enter the Cancer StudyID", "lgg_ucsf_2014")
 
-    if (studyID == null || studyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        studyID = studyID;
+        if (studyID == null || studyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            studyID = studyID;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
-    var sampleID = prompt("Please enter the PatientID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
+    try{
+        var sampleID = prompt("Please enter the PatientID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
 
-    if (sampleID == null) {
-        txt = "User cancelled the prompt.";
-    }else if (sampleID == "") {
-        sampleID = patientID
-    }else {
-        sampleID = sampleID;
+        if (sampleID == null) {
+            throw new Error("User cancelled the prompt.");
+        }else if (sampleID == "") {
+            sampleID = patientID
+        }else {
+            sampleID = sampleID;
+        }
     }
+    catch(e){
+        alert(e.message);
+    }
+    
 
     filename = "Clinical_Events_4_"+ sampleID + "_" + studyID;
 
@@ -542,14 +559,19 @@ function clinical_attributes(){
 
 function clinical_attributes_studyID(){
     
-    var studyID = prompt("Please enter the Cancer StudyID", "gbm_tcga")
-    
-    if (studyID == null || studyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        studyID = studyID;
-    }        
-
+    try{
+        var studyID = prompt("Please enter the Cancer StudyID", "gbm_tcga")
+        
+        if (studyID == null || studyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            studyID = studyID;
+        }    
+    }
+    catch(e){
+        alert(e.message);       
+    }
+        
     console.log(studyID);
     filename = "clinical_attributes_" + studyID    
     
@@ -594,28 +616,38 @@ function clinical_attributes_studyID(){
 }
 
 function copy_number_segments(patientID){
+    try{
+        var studyID = prompt("Please enter the Cancer StudyID", "acc_tcga")
 
-    var studyID = prompt("Please enter the Cancer StudyID", "acc_tcga")
-
-    if (studyID == null || studyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        studyID = studyID;
-    }    
-
-    var sampleID = prompt("Please enter the study sample ID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
-
-    if (studyID == null) {
-        txt = "User cancelled the prompt.";
-    }else if (studyID == "") {
-        studyID = patientID
-    }else {
-        studyID = studyID;
+        if (studyID == null || studyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            studyID = studyID;
+        }
     }
+    catch(e){
+        alert(e.message);
+    }
+
+    try{
+        var sampleID = prompt("Please enter the study sample ID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
+
+        if (sampleID == null) {
+            throw new Error("User cancelled the prompt.");
+        }else if (sampleID == "") {
+            sampleID = patientID
+        }else{
+            sampleID = sampleID;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+   
 
     filename = patientID +"_Copy_number_Segments"
 
-    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+patientID+"/copy-number-segments?projection=SUMMARY&pageSize=20000&pageNumber=0&direction=ASC";
+    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+sampleID+"/copy-number-segments?projection=SUMMARY&pageSize=20000&pageNumber=0&direction=ASC";
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
@@ -653,23 +685,32 @@ function copy_number_segments(patientID){
 }
 
 function discrete_copynumber_alterations(){
+    try{
+        var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_gistic")
 
-    var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_gistic")
-
-    if (molecularProfileId == null || molecularProfileId == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        molecularProfileId = molecularProfileId;
+        if (molecularProfileId == null || molecularProfileId == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            molecularProfileId = molecularProfileId;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
-    var sampleListId = prompt("Please enter Sample List ID", "acc_tcga_all")
+    try{
+        var sampleListId = prompt("Please enter Sample List ID", "acc_tcga_all")
 
-    if (sampleListId == null || sampleListId == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        sampleListId = sampleListId;
-    }    
-
+        if (sampleListId == null || sampleListId == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            sampleListId = sampleListId;
+        }    
+    }
+    catch(e){
+        alert(e.message);
+    }
+    
     filename = "discrete_copynumber_alterations_4_"+ molecularProfileId +"_"+ sampleListId
 
     downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/discrete-copy-number?sampleListId="+sampleListId+"&discreteCopyNumberEventType=HOMDEL_AND_AMP&projection=SUMMARY";
@@ -752,14 +793,19 @@ function get_all_gene_panel(){
 
 function gene_panelID(){
 
-    var gene_panelID = prompt("Please enter Gene Panel ID", "NSCLC_UNITO_2016_PANEL")
+    try{
+        var gene_panelID = prompt("Please enter Gene Panel ID", "NSCLC_UNITO_2016_PANEL")
 
-    if (gene_panelID == null || gene_panelID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        gene_panelID = gene_panelID;
+        if (gene_panelID == null || gene_panelID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            gene_panelID = gene_panelID;
+        }
     }
-    
+    catch(e){
+        alert(e.message);
+    }
+
     filename = "GenePanelID_4_"+ gene_panelID
 
     downloadurl = "http://www.cbioportal.org/api/gene-panels/"+ gene_panelID;
@@ -802,30 +848,44 @@ function gene_panelID(){
 
 function molecular_data(){
 
-    var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_rna_seq_v2_mrna")
+    try{
+        var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_rna_seq_v2_mrna")
 
-    if (molecularProfileId == null || molecularProfileId == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        molecularProfileId = molecularProfileId;
+        if (molecularProfileId == null || molecularProfileId == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            molecularProfileId = molecularProfileId;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
-    var sampleListId = prompt("Please enter Study Sample List ID", "acc_tcga_all")
+    try{
+        var sampleListId = prompt("Please enter Study Sample List ID", "acc_tcga_all")
 
-    if (sampleListId == null || sampleListId == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        sampleListId = sampleListId;
+        if (sampleListId == null || sampleListId == "") {
+            txt = "User cancelled the prompt.";
+        }else {
+            sampleListId = sampleListId;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
-    var entrezGeneId = prompt("Please enter numeric Entrez Gene Id", "1")
-
-    if (entrezGeneId == null || entrezGeneId == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        entrezGeneId = entrezGeneId;
-    }    
-
+    try{
+        var entrezGeneId = prompt("Please enter numeric Entrez Gene Id", "1")
+        if (entrezGeneId == null || entrezGeneId == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            entrezGeneId = entrezGeneId;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+    
     filename = "MolecularProfiles_4_"+ molecularProfileId +"_"+ sampleListId +"_"+ entrezGeneId
 
     downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/molecular-data?sampleListId="+sampleListId+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
@@ -908,12 +968,17 @@ function molecular_profiles_all(){
 
 function molecular_profiles_id(){
 
-    var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_mutations")
+    try{
+        var molecularProfileId = prompt("Please enter Molecular Profile ID", "acc_tcga_mutations")
 
-    if (molecularProfileId == null || molecularProfileId == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        molecularProfileId = molecularProfileId;
+        if (molecularProfileId == null || molecularProfileId == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            molecularProfileId = molecularProfileId;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
     filename = "MolecularProfiles_4_"+ molecularProfileId 
@@ -957,13 +1022,19 @@ function molecular_profiles_id(){
 
 function molecular_profiles_4_cancerstudyid(){
 
-    var cancerstudyID = prompt("Please enter Cancer Study ID for the molecular profiles", "acc_tcga")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer Study ID for the molecular profiles", "acc_tcga")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }
     }
+    catch(e){
+        alert(e.message);
+    }
+   
 
     filename = "MolecularProfiles_4_Cancerstudy_"+ cancerstudyID 
 
@@ -1074,14 +1145,19 @@ function molecular_mutations_profiles_4_cancerstudyid(){
 
 function all_patients_in_study(){
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
     }
-    
+    catch(e){
+        alert(e.message);
+    }
+
     filename = "All_patients_4_Cancerstudy_"+ cancerstudyID  
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/patients?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
@@ -1123,24 +1199,34 @@ function all_patients_in_study(){
 
 function patient_in_study(patientID){
 
-    var sampleID = prompt("Please enter the study patient ID or leave blank for selected Patient ID", "TCGA-02-0001")
+    try{
+        var sampleID = prompt("Please enter the study patient ID or leave blank for selected Patient ID", "TCGA-02-0001")
 
-    if (sampleID == null) {
-        txt = "User cancelled the prompt.";
-    }else if (sampleID == "") {
-        sampleID = patientID
-    }else {
-        sampleID = sampleID;
+        if (sampleID == null) {
+            throw new Error("User cancelled the prompt.");
+        }else if (sampleID == "") {
+            sampleID = patientID
+        }else {
+            sampleID = sampleID;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
 
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
-
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
     }
+    catch(e){
+        alert(e.message);
+    }
+  
     
     filename = "patient_in_Cancerstudy_"+ sampleID
 
@@ -1224,12 +1310,17 @@ function cBio_SamplesList(){
 
 function sampleList_in_study(){
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga_all")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga_all")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
     
     filename = "sampleList_in_study_"+ cancerstudyID  
@@ -1273,12 +1364,17 @@ function sampleList_in_study(){
 
 function all_samples_in_study(){
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga_all")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga_all")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
+    }
+    catch(e){
+        alert(e.message);
     }
     
     filename = "all_samples_in_study_"+ cancerstudyID  
@@ -1363,14 +1459,19 @@ function all_available_studies(){
 
 function single_study(){
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }
     }
-    
+    catch(e){
+        alert(e.message);
+    }
+
     filename = "single_study_"+ cancerstudyID  
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID;
@@ -1412,12 +1513,17 @@ function single_study(){
 
 function copynumberregions_in_study(){
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }
+    }
+    catch(e){
+        alert(e.message);
     }
     
     filename = "copynumberregions_in_study_"+ cancerstudyID  
@@ -1461,12 +1567,17 @@ function copynumberregions_in_study(){
 
 function mutated_genes_in_study(){
 
-    var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
 
-    if (cancerstudyID == null || cancerstudyID == "") {
-        txt = "User cancelled the prompt.";
-    }else {
-        cancerstudyID = cancerstudyID;
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
+    }
+    catch(e){
+        alert(e.message);
     }
     
     filename = "mutated_genes_in_study_"+ cancerstudyID  
