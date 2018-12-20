@@ -25,7 +25,6 @@ var window = webix.ui({
 
 sliderTemplate = ""
 
-
 webix.type(webix.ui.dataview, {
     name: "smallThumb",
     template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >",
@@ -69,8 +68,7 @@ var rajsFirstDataView = {
     }
 }
 
-function makePromise(url) {
-    // Sets up a promise in the proper way using webix
+function makePromise(url) {    
     return new webix.promise(function(success, fail) {
         webix.ajax(url, function(text) {
             if (text) success(text);
@@ -199,18 +197,15 @@ function multi_select(ar_selected) {
         perc.push(obj.meta.Blood_Red_Percentage);
         wb_count.push(obj.meta.White_Blood_Cell_Count);        
         Stain_Types.push(obj.meta.Stain_Types);
-        Cancer_Grading.push(obj.meta.Cancer_Grading);
-        // Associated_Genes.push(obj.meta.Associated_Genes);
+        Cancer_Grading.push(obj.meta.Cancer_Grading);        
         nextSlideText = "SlideID: " + obj._id +
             "\\n" + "Stain_Types: " + obj.meta.Stain_Types +
             "\\n " + "Blood_Red_Percentage: " + obj.meta.Blood_Red_Percentage +
             "\\n" + "White_Blood_Cell_Count: " + obj.meta.White_Blood_Cell_Count +
             "\\n" + "Cancer_Grading: " + obj.meta.Cancer_Grading +
-            // "\\n" + "Associated_Genes: " + obj.meta.Associated_Genes +
             "\\n" + "Slide Name: " + obj.name;
 
-        slideText = slideText + "\\n" + nextSlideText
-        // slideText = obj; //FIX THIS.. nt sure what your trying to render
+        slideText = slideText + "\\n" + nextSlideText        
     });
     var data = [
         { x: name, y: perc, mode: 'lines+markers', name: "BRC Percentage" },
@@ -427,8 +422,9 @@ function clinical_Events(patientID){
 
 function generic_cBioportal(){
     $("#othercbiodialog").dialog({
-            autoOpen: true,
+            autoOpen: true,            
             buttons: {
+                
                 cancer_types_all: function() {
                     cancer_types_all();
                     $(this).dialog("close");
@@ -465,11 +461,13 @@ function generic_cBioportal(){
                     discrete_copynumber_alterations();                    
                     $(this).dialog("close");
                 },
-                previous_menu: function() {
-                    history.back();                     
+                main_CBioportal_Dialog: function() {
+                    $("#maindialog").dialog("open"); 
+                    $(this).dialog("close");                   
                 }
             },
-            width: "500px"
+            width: "600px"             
+            
 
         });    
 }
@@ -1579,7 +1577,7 @@ function mutated_genes_in_study(){
     catch(e){
         alert(e.message);
     }
-    
+
     filename = "mutated_genes_in_study_"+ cancerstudyID  
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significantly-mutated-genes?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
