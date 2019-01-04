@@ -242,7 +242,55 @@ var dataViewControls = {
 }
 
 webix.ready(function() {
-    webix.ui({
+   
+
+pt1URL = "http://www.cbioportal.org/api/studies/gbm_tcga/patients/TCGA-02-0006/clinical-data?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+
+
+
+pt2URL = "http://www.cbioportal.org/api/studies/lgg_ucsf_2014/patients/P24/clinical-events?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+
+
+
+
+explistDT = {
+                view: "datatable",
+                autoConfig: true,
+                css: "checkbox_style",
+                id: "explist",
+                editable: true,
+                checkboxRefresh: true,
+                url: pt1URL                               
+            };
+
+explist = {
+            gravity: 5,
+            rows: [ 
+                    {
+                        cols: [
+                                {view:"button", label:"EmptyGrid", click:function(){$$("explist").clearAll()}},
+                                {view:"button", label:"ReloadSomeData??", click:function(){
+                                //Add a clearall if you don't want it to append to the current list..
+                                    $$("explist").clearAll();
+                                    $$("explist").config.columns ={}
+                                    $$("explist").refreshColumns();
+                                    $$("explist").load(pt1URL)}
+                                },
+                                {view:"button", label:"LoadSomeoneelse", click:function(){
+                                    $$("explist").clearAll();
+                                    $$("explist").config.columns ={}
+                                    $$("explist").refreshColumns();
+                                    $$("explist").load(pt2URL);
+                                }},
+                    ]},
+
+                    explistDT
+                  ]
+
+        }
+
+
+webix.ui({
         container: "main_layout",
         rows: [{
                 "cols": [{
@@ -252,7 +300,6 @@ webix.ready(function() {
                             rajsFirstDataView,
                             {
                                 view: "template",
-                                //template: "Footer",
                                 template: sliderTemplate,
                                 id: "sliderdata",
                                 gravity: 0.2
@@ -260,39 +307,13 @@ webix.ready(function() {
                         ]
                     },
                     { view: "resizer" },
-                    { view: "template", content: "plotly_div" },
-                    { view:"datatable", 
-                      id:"caseListTable", 
-                      on:{
-                            onBeforeLoad:function(){
-                            this.showOverlay("Loading...");
-                        },
-                            onAfterLoad:function(){
-                                console.log("onAfterLoad");
-                                if (!this.count()){
-                                    this.showOverlay("Sorry, there is no data");                                    
-                                } else {
-                                    this.hideOverlay();
-                                }
-                                
-                            }
-                        },
-                      columns: [
-                          {id:"No: ", header:"No.", width:35},
-                          {id:"Id: ", header:"ID", width:120},
-                          {id:"Stain: ", header:"StainTypes", width:60},
-                          {id:"BRC: ", header:"Blood_Red_Percentage", width:65},
-                          {id:"WBC: ", header:"White Blood Cell Count", width:65},
-                          {id:"Grade: ", header:"Cancer Grading", width:65},
-                          {id:"Name: ", header:"Slide Name", width:80},
-                      ],
-                      autoConfig: true,
-                      data: slideText                      
-                    }
+                    explist,
+                    { view: "template", content: "plotly_div" },                             
                 ]
             },
         ]
     })
+
 });
 
 function clinical_Data(patientID){     
@@ -319,7 +340,7 @@ function clinical_Data(patientID){
         $(document).ready(function() {
         var JSONData = $.getJSON(downloadurl, function(data) {
             var items = data;
-            console.log(items);
+            //console.log(items);
             const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
             const header = Object.keys(items[0]);
             let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
@@ -340,10 +361,44 @@ function clinical_Data(patientID){
         })
     }
     else {
-            promise = makePromise(downloadurl);
-            promise.then(function(result) {
-            console.log(result);        
-            return
+            promise = makePromise(downloadurl);            
+            promise.then(function(result) {  
+                console.log("pre-dynamic columns")
+                console.log(result);
+                var jsdata = JSON.parse(result);
+                console.log(jsdata);
+                // Dynamically adding up columns to webix datatable
+                columnNames = Object.keys(jsdata.data[0]);
+
+                var columns = [];
+                for (var i=0; i<columnNames.length; i++)
+                  columns.push({jsdata:columnNames[i], title:columnNames[i]});
+          
+                console.log(columns);
+
+                this.dtable = new webix.ui({
+                                container: "box",
+                                view: "datatable",
+                                autoheight: true,
+                                autoConfig: true,
+                                css: "checkbox_style",
+                                id: "explistt",
+                                editable: true,
+                                checkboxRefresh: true,
+                                columns: columns,
+                                data: jsdata,
+                                datatype:"jsarray"                
+                            });
+
+                $$("explistt").clearAll();
+                $$("explistt").parse(data);                
+                $$("explistt").refresh();
+
+                /**$$("cbiodatatable").clearAll();
+                $$("cbiodatatable").parse(data);                
+                $$("cbiodatatable").refresh();**/
+                console.log("datatable displayed");                          
+                return
             }, function(err) {
             console.log(err);
             });    
