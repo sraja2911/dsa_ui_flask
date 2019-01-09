@@ -210,8 +210,7 @@ function multi_select(ar_selected) {
     var data = [
         { x: name, y: perc, mode: 'lines+markers', name: "BRC Percentage" },
         { x: name, y: wb_count, mode: 'lines+markers', name: "WBC Count" }
-    ]
-    
+    ]    
     Plotly.newPlot("plotly_div", data, layout);
 }
 
@@ -242,16 +241,9 @@ var dataViewControls = {
 }
 
 webix.ready(function() {
-   
-
 pt1URL = "http://www.cbioportal.org/api/studies/gbm_tcga/patients/TCGA-02-0006/clinical-data?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
 
-
-
 pt2URL = "http://www.cbioportal.org/api/studies/lgg_ucsf_2014/patients/P24/clinical-events?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
-
-
-
 
 explistDT = {
                 view: "datatable",
@@ -283,7 +275,6 @@ explist = {
                                     $$("explist").load(pt2URL);
                                 }},
                     ]},
-
                     explistDT
                   ]
 
