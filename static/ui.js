@@ -56,7 +56,7 @@ var rajsFirstDataView = {
             } else {
                 multi_select(ar_selected);
             }
-        }
+            }
     },
     scheme: {
         $init: function(obj) {
@@ -75,6 +75,11 @@ function makePromise(url) {
             else fail(text.error)
         })
     })
+}
+
+function genomic_study(item){
+
+
 }
 
 function single_select(item) {
@@ -252,7 +257,7 @@ explistDT = {
                 id: "explist",
                 editable: true,
                 checkboxRefresh: true,
-                url: pt1URL                               
+                url: ""
             };
 
 explist = {
@@ -261,18 +266,121 @@ explist = {
                     {
                         cols: [
                                 {view:"button", label:"EmptyGrid", click:function(){$$("explist").clearAll()}},
-                                {view:"button", label:"ReloadSomeData??", click:function(){
+                                {view:"button", label:"Available GenePanels for study", click:function(){
+                                    $$("explist").clearAll()
+                                    $$("explist").config.columns ={}
+                                    $$("explist").refreshColumns();
+                                    genepanelurl = "http://www.cbioportal.org/api/gene-panels?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+                                    $$("explist").load(genepanelurl);
+                                }},
+                                {view:"button", label:"Specific genepaneldata", click:function(){
+                                    $$("explist").clearAll();
+                                    $$("explist").config.columns ={}
+                                    $$("explist").refreshColumns();
+
+                                    try{
+                                        var cancerstudyID = prompt("Please enter Gene PanelID ", "IMPACT341")
+
+                                        if (cancerstudyID == null || cancerstudyID == "") {
+                                            throw new Error("User cancelled the prompt.");
+                                        }else {
+                                            cancerstudyID = cancerstudyID;
+                                        }
+                                    }
+                                    catch(e){
+                                        alert(e.message);
+                                    }
+                                    genepanelidurl = "http://www.cbioportal.org/api/gene-panels/"+cancerstudyID
+                                    $$("explist").load(genepanelidurl);
+                                }},
+                                {view:"button", label:"MutationData for CancerStudy", click:function(){
                                 //Add a clearall if you don't want it to append to the current list..
                                     $$("explist").clearAll();
                                     $$("explist").config.columns ={}
                                     $$("explist").refreshColumns();
-                                    $$("explist").load(pt1URL)}
-                                },
-                                {view:"button", label:"LoadSomeoneelse", click:function(){
+
+                                    try{
+                                        var molecularProfileId = prompt("Please enter molecular profilesID ", "acc_tcga_mutations")
+
+                                        if (molecularProfileId == null || molecularProfileId == "") {
+                                            throw new Error("User cancelled the prompt.");            
+                                        }else {
+                                            molecularProfileId = molecularProfileId;
+                                        }
+                                    }
+                                    catch(e){
+                                        alert(e.message);
+                                    }
+
+                                    try{
+                                        var cancerstudyID = prompt("Please enter Cancer Study ID for the mutations profiles", "acc_tcga_all")
+
+                                        if (cancerstudyID == null || cancerstudyID == "") {
+                                            throw new Error("User cancelled the prompt.");            
+                                        }else {
+                                            cancerstudyID = cancerstudyID;
+                                        }    
+                                    }
+                                    catch(e){
+                                        alert(e.message);
+                                    }
+                                    mutationurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/mutations?sampleListId="+cancerstudyID+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+                                    $$("explist").load(mutationurl);
+                                }},
+                                {view:"button", label:"CopyNumber Regions", click:function(){
                                     $$("explist").clearAll();
                                     $$("explist").config.columns ={}
                                     $$("explist").refreshColumns();
-                                    $$("explist").load(pt2URL);
+
+                                    try{
+                                        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+                                        if (cancerstudyID == null || cancerstudyID == "") {
+                                            throw new Error("User cancelled the prompt.");
+                                        }else {
+                                            cancerstudyID = cancerstudyID;
+                                        }
+                                    }
+                                    catch(e){
+                                        alert(e.message);
+                                    }
+                                    CNVurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significant-copy-number-regions?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+                                    $$("explist").load(CNVurl);
+                                }},
+                                {view:"button", label:"CopyNumberSegments-Patient", click:function(){
+                                    $$("explist").clearAll();
+                                    $$("explist").config.columns ={}
+                                    $$("explist").refreshColumns();
+
+                                    try{
+                                        var studyID = prompt("Please enter the Cancer StudyID", "gbm_tcga")
+
+                                        if (studyID == null || studyID == "") {
+                                            throw new Error("User cancelled the prompt.");
+                                        }else {
+                                            studyID = studyID;
+                                        }
+                                    }
+                                    catch(e){
+                                        alert(e.message);
+                                    }
+
+                                    try{
+                                        var sampleID = prompt("Please enter the Patient ID", "TCGA-02-0001-01")
+
+                                        if (sampleID == null) {
+                                            throw new Error("User cancelled the prompt.");
+                                        }else if (sampleID == "") {
+                                            sampleID = patientID
+                                        }else{
+                                            sampleID = sampleID;
+                                        }
+                                    }
+                                    catch(e){
+                                        alert(e.message);
+                                    }
+                                    copynumberurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+sampleID+"/copy-number-segments?projection=SUMMARY&pageSize=20000&pageNumber=0&direction=ASC";
+                                    $$("explist").load(copynumberurl);
                                 }},
                     ]},
                     explistDT
@@ -373,7 +481,7 @@ function clinical_Data(patientID){
                                 autoheight: true,
                                 autoConfig: true,
                                 css: "checkbox_style",
-                                id: "explistt",
+                                id: "explist",
                                 editable: true,
                                 checkboxRefresh: true,
                                 columns: columns,
@@ -381,9 +489,9 @@ function clinical_Data(patientID){
                                 datatype:"jsarray"                
                             });
 
-                $$("explistt").clearAll();
-                $$("explistt").parse(data);                
-                $$("explistt").refresh();
+                $$("explist").clearAll();
+                $$("explist").parse(data);                
+                $$("explist").refresh();
 
                 /**$$("cbiodatatable").clearAll();
                 $$("cbiodatatable").parse(data);                
@@ -1135,7 +1243,7 @@ function molecular_mutations_profiles_4_cancerstudyid(){
     }
 
     try{
-        var cancerstudyID = prompt("Please enter Cancer Study ID for the mutations profiles", "acc_tcga")
+        var cancerstudyID = prompt("Please enter Cancer Study ID for the mutations profiles", "acc_tcga_all")
 
         if (cancerstudyID == null || cancerstudyID == "") {
             throw new Error("User cancelled the prompt.");            
