@@ -256,28 +256,44 @@ explistDT = {
                 css: "checkbox_style",
                 id: "explist",
                 editable: true,
-                checkboxRefresh: true,
+                checkboxRefresh: true, 
+                spans:true,
+                select:"cell",
+                scrollX:false,               
                 url: ""
             };
 
 explist = {
             gravity: 5,
             rows: [ 
+
                     {
                         cols: [
                                 {view:"button", label:"EmptyGrid", click:function(){$$("explist").clearAll()}},
                                 {view:"button", label:"Available GenePanels for study", click:function(){
                                     $$("explist").clearAll()
                                     $$("explist").config.columns ={}
-                                    $$("explist").refreshColumns();
+                                    $$("explist").refreshColumns();                                    
                                     genepanelurl = "http://www.cbioportal.org/api/gene-panels?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
                                     $$("explist").load(genepanelurl);
                                 }},
                                 {view:"button", label:"Specific genepaneldata", click:function(){
-                                    $$("explist").clearAll();
-                                    $$("explist").config.columns ={}
-                                    $$("explist").refreshColumns();
 
+                                    function show_geneId(obj, common, value, colId, index){ 
+                                        return obj.genes[index].entrezGeneId      
+                                    }
+                                    function show_geneSymbol(obj, common, value, colId, index){ 
+                                        return obj.genes[index].hugoGeneSymbol      
+                                    }                                      
+                                    $$("explist").clearAll();  
+                                    //$$("explist").config.columns ={}                                  
+                                    $$("explist").config.columns=[
+                                        {id: "Description", map:"#description#"},
+                                        {id: "GeneId", isGroupItem: true, header:[{"text":"genes", colspan:"2"},{"text":"entrezGeneId"}], template:show_geneId},
+                                        {id: "GeneSymbol", isGroupItem: true, header:[null,{"text":"GeneSymbol"}], template:show_geneSymbol},
+                                        {id: "PanelId", map:"#genePanelId#"}                                        
+                                    ];                                                                        
+                                    $$("explist").refreshColumns();
                                     try{
                                         var cancerstudyID = prompt("Please enter Gene PanelID ", "IMPACT341")
 
@@ -291,7 +307,8 @@ explist = {
                                         alert(e.message);
                                     }
                                     genepanelidurl = "http://www.cbioportal.org/api/gene-panels/"+cancerstudyID
-                                    $$("explist").load(genepanelidurl);
+                                    console.log(genepanelidurl)
+                                    $$("explist").load(genepanelidurl);                                    
                                 }},
                                 {view:"button", label:"MutationData for CancerStudy", click:function(){
                                 //Add a clearall if you don't want it to append to the current list..
@@ -327,11 +344,10 @@ explist = {
                                     mutationurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/mutations?sampleListId="+cancerstudyID+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
                                     $$("explist").load(mutationurl);
                                 }},
-                                {view:"button", label:"CopyNumber Regions", click:function(){
+                                {view:"button", label:"CopyNumber Regions", click:function(){                                    
                                     $$("explist").clearAll();
                                     $$("explist").config.columns ={}
-                                    $$("explist").refreshColumns();
-
+                                    $$("explist").refreshColumns();                                    
                                     try{
                                         var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
 
@@ -345,6 +361,7 @@ explist = {
                                         alert(e.message);
                                     }
                                     CNVurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significant-copy-number-regions?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+                                    console.log(CNVurl);
                                     $$("explist").load(CNVurl);
                                 }},
                                 {view:"button", label:"CopyNumberSegments-Patient", click:function(){
@@ -613,6 +630,10 @@ function generic_cBioportal(){
                 },
                 discrete_copynumber_alterations: function() {
                     discrete_copynumber_alterations();                    
+                    $(this).dialog("close");
+                },
+                gene_panelID: function() {
+                    gene_panelID();                    
                     $(this).dialog("close");
                 },
                 main_CBioportal_Dialog: function() {
