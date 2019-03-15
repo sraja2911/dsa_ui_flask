@@ -1,5 +1,9 @@
-A webix UI pulling data from cBioportal, with Girder/DSA data view:
+A webix/Flask UI pulling data from cBioportal, with Girder/DSA data view:
 
+To run:
+1. Git clone the entire repository
+2. Ensure the folder structure is not changed as needed by Flask app
+3. Run dsa_ui_flask->python app.py
 
 
 Commands to Pull data from cBioPortal for the following Genomic queries
