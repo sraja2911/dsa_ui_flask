@@ -29,3 +29,7 @@ Commands to Pull data from cBioPortal for the following Genomic queries
 'Phospho_Protein_Array_Info'     : Phospho protein Antibodies used by reverse-phase protein arrays (RPPA) (argument: Cancer_Study)
 
 'Protein_Array_Data'             : Get RPPA-based Proteomics Data (argument: Cancer_Study                                 )
+
+
+To run the Application docker:
+docker run -it --rm -p5000:5000 sraja2911/dsa_ui_flask:latest 
