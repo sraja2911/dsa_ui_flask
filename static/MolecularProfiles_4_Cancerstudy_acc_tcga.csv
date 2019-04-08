@@ -1,9 +1,0 @@
-﻿molecularAlterationType,datatype,name,description,showProfileInAnalysisTab,molecularProfileId,studyId
-"PROTEIN_LEVEL","LOG2-VALUE","Protein expression (RPPA)","Protein expression measured by reverse-phase protein array",false,"acc_tcga_rppa","acc_tcga"
-"PROTEIN_LEVEL","Z-SCORE","Protein expression Z-scores (RPPA)","Protein expression, measured by reverse-phase protein array, Z-scores",true,"acc_tcga_rppa_Zscores","acc_tcga"
-"COPY_NUMBER_ALTERATION","DISCRETE","Putative copy-number alterations from GISTIC","Putative copy-number calls on 90 cases determined using GISTIC 2.0. Values: -2 = homozygous deletion; -1 = hemizygous deletion; 0 = neutral / no change; 1 = gain; 2 = high level amplification.",true,"acc_tcga_gistic","acc_tcga"
-"MRNA_EXPRESSION","CONTINUOUS","mRNA expression (RNA Seq V2 RSEM)","Expression levels for 20532 genes in 79 acc cases (RNA Seq V2 RSEM).",false,"acc_tcga_rna_seq_v2_mrna","acc_tcga"
-"MRNA_EXPRESSION","Z-SCORE","mRNA Expression z-Scores (RNA Seq V2 RSEM)","mRNA z-Scores (RNA Seq V2 RSEM) compared to the expression distribution of each gene tumors that are diploid for this gene.",true,"acc_tcga_rna_seq_v2_mrna_median_Zscores","acc_tcga"
-"COPY_NUMBER_ALTERATION","CONTINUOUS","Relative linear copy-number values","Relative linear copy-number values for each gene (from Affymetrix SNP6).",false,"acc_tcga_linear_CNA","acc_tcga"
-"METHYLATION","CONTINUOUS","Methylation (HM450)","Methylation (HM450) beta-values for genes in 80 cases. For genes with multiple methylation probes, the probe most anti-correlated with expression.",false,"acc_tcga_methylation_hm450","acc_tcga"
-"MUTATION_EXTENDED","MAF","Mutations","Mutation data from whole exome sequencing. Mutation packager: ACC/20160128/gdac.broadinstitute.org_ACC.Mutation_Packager_Calls.Level_3.2016012800.0.0.tar.gz.",true,"acc_tcga_mutations","acc_tcga"
