@@ -1,5 +1,7 @@
 config = {}
-config.BASE_URL = "http://candygram.neurology.emory.edu:8080/api/v1"
+//config.BASE_URL = "http://candygram.neurology.emory.edu:8080/api/v1"
+config.BASE_URL = "http://digitalslidearchive.emory.edu:8080/girder_root/api/v1"
+
 
 thumbHeight = 200;
 
@@ -42,21 +44,23 @@ webix.type(webix.ui.dataview, {
 var rajsFirstDataView = {
     view: "dataview",
     id: "slideDataview",
-    url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
     type: "smallThumb",
 
     "select": true,
     "multiselect": true,
     "on": {
         'onAfterSelect': function(id) {
+            // var ar_selected = $$('slideDataview').select();
+            // multi_select(ar_selected);  
             var ar_selected = $$("slideDataview").getSelectedItem(true);
-
-            if (ar_selected.length == 1) {
-                single_select(ar_selected[0])
-            } else {
-                multi_select(ar_selected);
-            }
-            }
+                if (ar_selected.length == 1) {
+                    single_select(ar_selected[0])
+                } else {
+                    multi_select(ar_selected)
+                }
+             }
     },
     scheme: {
         $init: function(obj) {
@@ -77,22 +81,27 @@ function makePromise(url) {
     })
 }
 
-function genomic_study(item){
-
-
-}
-
 function single_select(item) {
     id = item._id;
+    var airbubble = []
+    var blood = []
+    var ink = []
+
     if ("meta" in item) {
+        var tags = item.meta.tags;
         var Stain_Types = item.meta.Stain_Types;
         var Blood_Red_Percentage = item.meta.Blood_Red_Percentage;
         var White_Blood_Cell_Count = item.meta.White_Blood_Cell_Count;
         var Cancer_Grading = item.meta.Cancer_Grading;
-        sliderTemplate = "<div>SlideName:#name#<br>SlideID:#id#<br>StainTypes:#meta.Stain_Types#<br>RBC:#meta.Blood_Red_Percentage#<br>Grade:#meta.Cancer_Grading#<br> " +
-           "WBC:#meta.White_Blood_Cell_Count# </div>"
+
         patientID = item.name.substring(0,12);
-        studyID=Cancer_Grading.substring(0,3);      
+        sampleID = item.name.substring(0,15); 
+
+        var airbubble = tags['AirBubble'];        
+        var blood = item.meta.tags['Blood'];              
+        var ink = item.meta.tags['Ink'];                      
+                        
+        //studyID=Cancer_Grading.substring(0,3);      
         $("#maindialog").dialog({
             autoOpen: true,
             buttons: {
@@ -104,12 +113,16 @@ function single_select(item) {
                     clinical_Data_4_study(studyID);                    
                     $(this).dialog("close");
                 },
+                clinical_Data_4_sample_studyID: function() {
+                    clinical_Data_4_sample_studyID(studyID);                    
+                    $(this).dialog("close");
+                },
                 clinical_Events: function() {
                     clinical_Events(patientID);
                     $(this).dialog("close");
                 },
                 copy_number_segments: function() {
-                    copy_number_segments(patientID);                    
+                    copy_number_segments(sampleID);                    
                     $(this).dialog("close");
                 },
                 molecular_data:function(){
@@ -128,25 +141,24 @@ function single_select(item) {
                     cBio_SamplesList();                    
                     $(this).dialog("close");
                 },
-                sampleList_in_sample: function() {
-                    sampleList_in_sample();                    
+                sampleList_in_sampleId: function() {
+                    sampleList_in_sampleId();                    
                     $(this).dialog("close");
                 },
                 all_sampleIDs_in_samplelist: function() {
                     all_sampleIDs_in_samplelist();                    
                     $(this).dialog("close");
-                },
-                sampleIDs_in_sample: function() {
-                    sampleIDs_in_sample();                    
-                    $(this).dialog("close");
-                },
+                },                
                 samplelist_in_study: function() {
                     samplelist_in_study();                    
                     $(this).dialog("close");
                 },
-
+                allcaselists_in_study: function(){
+                    allcaselists_in_study();                    
+                    $(this).dialog("close");
+                },
                 allsamples_patient_in_study: function() {
-                    allsamples_patient_in_study();                    
+                    allsamples_patient_in_study(patientID);                    
                     $(this).dialog("close");
                 },
                 all_samples_in_study: function() {
@@ -154,10 +166,9 @@ function single_select(item) {
                     $(this).dialog("close");
                 },
                 sample_in_study: function() {
-                    sample_in_study();                    
+                    sample_in_study(patientID);                    
                     $(this).dialog("close");
-                },
-                                 
+                },                                 
                 mutated_genes_in_study: function() {
                     mutated_genes_in_study();                    
                     $(this).dialog("close");
@@ -165,17 +176,17 @@ function single_select(item) {
                 copynumberregions_in_study: function() {
                     copynumberregions_in_study();                    
                     $(this).dialog("close");
-                },
-                all_samples_in_study: function() {
-                    all_samples_in_study();                    
-                    $(this).dialog("close");
-                },
+                },                
                 all_available_studies: function() {
                     all_available_studies();                    
                     $(this).dialog("close");
                 },
                 single_study: function() {
                     single_study();                    
+                    $(this).dialog("close");
+                },
+                tags_of_study: function() {
+                    tags_of_study();                    
                     $(this).dialog("close");
                 },  
                 generic_cBioportal: function() {
@@ -217,37 +228,43 @@ var layout = {
 slideText =""
 
 function multi_select(ar_selected) {
+
     var slideRecords = webix.toArray(ar_selected);
     data = []
-    var update = {}
+    var update = []
     var name = []
-    var perc = []
-    var wb_count = []
-    var Stain_Types = []
-    var Cancer_Grading = []
-    var Associated_Genes = []
-    var slideText = []
+    var patientID = []
+    var geneID
+    var sampleID = []
+    
+    var tags = []
+
+    var airbubble = [];
+    var blood = [];
+    var ink = [];
+    var geneexp_5728 = [];
+    var geneexp_1956 = [];
+    var geneexp_5156 = [];
+    var geneexp_7157 = [];
     slideRecords.each(function(obj) {        
         name.push(obj.name);
-        perc.push(obj.meta.Blood_Red_Percentage);
-        wb_count.push(obj.meta.White_Blood_Cell_Count);        
-        Stain_Types.push(obj.meta.Stain_Types);
-        Cancer_Grading.push(obj.meta.Cancer_Grading);        
-        nextSlideText = "SlideID: " + obj._id +
-            "\\n" + "Stain_Types: " + obj.meta.Stain_Types +
-            "\\n " + "Blood_Red_Percentage: " + obj.meta.Blood_Red_Percentage +
-            "\\n" + "White_Blood_Cell_Count: " + obj.meta.White_Blood_Cell_Count +
-            "\\n" + "Cancer_Grading: " + obj.meta.Cancer_Grading +
-            "\\n" + "Slide Name: " + obj.name;
+        patientID.push(obj.name.substring(0,12));        
+        sampleID.push(obj.name.substring(0,15));        
 
-        slideText = slideText + "\\n" + nextSlideText        
-    });
-    var data = [
-        { x: name, y: perc, mode: 'lines+markers', name: "BRC Percentage" },
-        { x: name, y: wb_count, mode: 'lines+markers', name: "WBC Count" }
-    ]    
-    Plotly.newPlot("plotly_div", data, layout);
+        tags.push(obj.meta.tags);        
+        airbubble.push(obj.meta.tags['AirBubble']);        
+        blood.push(obj.meta.tags['Blood']);        
+        ink.push(obj.meta.tags['Ink']);                
+        
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_rna_seq_v2_mrna_median_Zscores"; 
+        //pten_3d_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink);      
+        //blood_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,airbubble,blood,ink)
+        blood_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink)              
+   } )//end of slideRecords
+
 }
+
 
 var dataViewControls = {
     cols: [{
@@ -454,13 +471,85 @@ webix.ui({
                     },
                     { view: "resizer" },
                     explist,
-                    { view: "template", content: "plotly_div" },                             
+                    { view: "resizer"},
+                    { view: "template", content: "plotly_div" },
+                    { view: "resizer"}                             
                 ]
             },
         ]
     })
 
 });
+
+function clinical_Data_4_sample_studyID(patientID){
+
+try{
+        var studyID = prompt("Please enter the Cancer StudyID", "lgg_ucsf_2014")
+
+        if (studyID == null || studyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            studyID = studyID;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    try{
+        var sampleID = prompt("Please enter the PatientID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
+
+        if (sampleID == null) {
+            throw new Error("User cancelled the prompt.");
+        }else if (sampleID == "") {
+            sampleID = patientID
+        }else {
+            sampleID = sampleID;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+    
+
+    filename = "clinical_Data_4_sample_"+ sampleID + "studyID_" + studyID;
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+sampleID+"/clinical-events?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            //const key_replacer = (key, value) => key === null ? "" : key; // specify how you want to handle null keys here
+            const replacer = (key, value) => value === null ? "" : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
 
 function clinical_Data_4_patient(patientID){     
 
@@ -764,6 +853,62 @@ function clinical_attributes(){
     
 }
 
+function all_sampleIDs_in_samplelist(){
+    try{
+        var samplelistID = prompt("Please enter the Sample listid", "gbm_tcga")
+        
+        if (samplelistID == null || samplelistID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            samplelistID = samplelistID;
+        }    
+    }
+    catch(e){
+        alert(e.message);       
+    }
+        
+    console.log(samplelistID);
+    filename = "all_sampleIds_" + samplelistID    
+    
+    downloadurl = "http://www.cbioportal.org/api/sample-lists/"+ samplelistID+"/sample-ids?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            //const key_replacer = (key, value) => key === null ? "" : key; // specify how you want to handle null keys here
+            const replacer = (key, value) => value === null ? "" : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            console.log(studyID);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+
+}
+
 function clinical_attributes_studyID(){
     
     try{
@@ -822,7 +967,7 @@ function clinical_attributes_studyID(){
     
 }
 
-function copy_number_segments(patientID){
+function copy_number_segments(sampleID){
     try{
         var studyID = prompt("Please enter the Cancer StudyID", "acc_tcga")
 
@@ -837,14 +982,15 @@ function copy_number_segments(patientID){
     }
 
     try{
-        var sampleID = prompt("Please enter the study sample ID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
+        var studysampleID = prompt("Please enter the study sample ID or leave blank for selected sampleID", "TCGA-OR-A5J2-01")
+        
 
-        if (sampleID == null) {
+        if (studysampleID == null) {
             throw new Error("User cancelled the prompt.");
-        }else if (sampleID == "") {
-            sampleID = patientID
+        }else if (studysampleID == "") {
+            studysampleID = sampleID            
         }else{
-            sampleID = sampleID;
+            studysampleID = sampleID;            
         }
     }
     catch(e){
@@ -854,7 +1000,7 @@ function copy_number_segments(patientID){
 
     filename = patientID +"_Copy_number_Segments"
 
-    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+sampleID+"/copy-number-segments?projection=SUMMARY&pageSize=20000&pageNumber=0&direction=ASC";
+    downloadurl = "http://www.cbioportal.org/api/studies/"+studyID+"/samples/"+studysampleID+"/copy-number-segments?projection=SUMMARY&pageSize=20000&pageNumber=0&direction=ASC";
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
@@ -1173,6 +1319,60 @@ function molecular_profiles_all(){
         }
 }
 
+function sampleList_in_sampleId(){
+    try{
+        var sampleListId = prompt("Please enter Sample ListId", "acc_tcga_mutations")
+
+        if (sampleListId == null || sampleListId == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            sampleListId = sampleListId;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    filename = "Samplelist_4_"+ sampleListId 
+
+    downloadurl = "http://www.cbioportal.org/api/sample-lists/" + sampleListId+"/sample-ids?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }    
+}
+
+
 function molecular_profiles_id(){
 
     try{
@@ -1255,6 +1455,186 @@ function molecular_profiles_4_cancerstudyid(){
             const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
             const header = Object.keys(items[0]);
             let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function allcaselists_in_study(){
+    try{
+        var cancerStudyId = prompt("Please enter Cancer StudyId ", "gbm_tcga")
+
+        if (cancerStudyId == null || cancerStudyId == "") {
+            throw new Error("User cancelled the prompt.");            
+        }else {
+            cancerStudyId = cancerStudyId;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    filename = "allcaselists_in_study_"+ cancerStudyId    
+    downloadurl = "https://www.cbioportal.org/webservice.do?cmd=getCaseLists&cancer_study_id="+cancerStudyId;
+    console.log(downloadurl);
+                  
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;            
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+
+}
+
+
+
+function samplelist_in_study(){
+    try{
+        var cancerStudyId = prompt("Please enter Cancer StudyId ", "gbm_tcga")
+
+        if (cancerStudyId == null || cancerStudyId == "") {
+            throw new Error("User cancelled the prompt.");            
+        }else {
+            cancerStudyId = cancerStudyId;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    filename = "samplelist_in_study_"+ cancerStudyId
+
+    downloadurl = "https://www.cbioportal.org/api/studies/"+cancerStudyId+"/sample-lists?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+                  
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+
+}
+
+function allsamples_patient_in_study(patientId){
+    try{
+        var cancerStudyId = prompt("Please enter Cancer StudyId ", "acc_tcga_mutations")
+
+        if (cancerStudyId == null || cancerStudyId == "") {
+            throw new Error("User cancelled the prompt.");            
+        }else {
+            cancerStudyId = cancerStudyId;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    try{
+        var sampleID = prompt("Please enter the PatientID or leave blank for selected Patient ID", "TCGA-OR-A5J2-01")
+
+        if (sampleID == null) {
+            throw new Error("User cancelled the prompt.");
+        }else if (sampleID == "") {
+            sampleID = patientID
+        }else {
+            sampleID = sampleID;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    filename = "allsamples_patient_in_study_"+ cancerStudyId +"_patientId_" + sampleID
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerStudyId+"/patients/"+sampleID+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+                  
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
             csv.unshift(header.join(','));
             csv = csv.join('\r\n');
 
@@ -1368,7 +1748,7 @@ function all_patients_in_study(){
     filename = "All_patients_4_Cancerstudy_"+ cancerstudyID  
 
     downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/patients?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
-
+                    
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
         var JSONData = $.getJSON(downloadurl, function(data) {
@@ -1532,7 +1912,7 @@ function sampleList_in_study(){
     
     filename = "sampleList_in_study_"+ cancerstudyID  
 
-    downloadurl = "http://www.cbioportal.org/api/sample-lists/"+cancerstudyID;
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/sample-lists";
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
@@ -1569,6 +1949,78 @@ function sampleList_in_study(){
         }
 }
 
+function sample_in_study(patientID){
+
+    try{
+        var sampleID = prompt("Please enter the study patient ID or leave blank for selected Patient ID", "TCGA-02-0001")
+
+        if (sampleID == null) {
+            throw new Error("User cancelled the prompt.");
+        }else if (sampleID == "") {
+            sampleID = patientID
+        }else {
+            sampleID = sampleID;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
+    }
+    catch(e){
+        alert(e.message);
+    }
+  
+    
+    filename = "sample_in_Cancerstudy_"+ sampleID
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+ cancerstudyID+ "/samples/"+ sampleID+"?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+
+
+}
+
 function all_samples_in_study(){
 
     try{
@@ -1586,7 +2038,7 @@ function all_samples_in_study(){
     
     filename = "all_samples_in_study_"+ cancerstudyID  
 
-    downloadurl = "http://www.cbioportal.org/api/sample-lists/"+cancerstudyID+"/sample-ids";
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/samples";
 
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
@@ -1638,6 +2090,59 @@ function all_available_studies(){
             const header = Object.keys(items[0]);
             let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
             //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+}
+
+function tags_of_study(){
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    filename = "tags_of_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/tags?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;
+            console.log(items);
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
             csv.unshift(header.join(','));
             csv = csv.join('\r\n');
 
@@ -1827,33 +2332,32 @@ function copynumberregions_in_study(){
         }
 }
 
-function mutated_genes_in_study(){
-
+function geneExp_PTEN_EGFR_PDGFRA_TP53(){
     try{
-        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+        var genetic_profile_id = prompt("Please enter genetic_profile_id ", "gbm_tcga_mrna_U133_Zscores")
 
-        if (cancerstudyID == null || cancerstudyID == "") {
-            throw new Error("User cancelled the prompt.");
+        if (genetic_profile_id == null || genetic_profile_id == "") {
+            throw new Error("User cancelled the prompt.");            
         }else {
-            cancerstudyID = cancerstudyID;
-        }    
+            genetic_profile_id = genetic_profile_id;
+        }
     }
     catch(e){
         alert(e.message);
     }
 
-    filename = "mutated_genes_in_study_"+ cancerstudyID  
-
-    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significantly-mutated-genes?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
-
+    filename = "allcaselists_in_study_"+ cancerStudyId    
+    downloadurl = "https://www.cbioportal.org/webservice.do?cmd=getCaseLists&cancer_study_id="+cancerStudyId;
+    console.log(downloadurl);
+                  
     if (confirm('Do you want to download CSV data?')) {
         $(document).ready(function() {
         var JSONData = $.getJSON(downloadurl, function(data) {
-            var items = data;
-            console.log(items);
+            var items = data;            
             const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
             const header = Object.keys(items[0]);
-            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
             csv.unshift(header.join(','));
             csv = csv.join('\r\n');
 
@@ -1879,4 +2383,408 @@ function mutated_genes_in_study(){
             console.log(err);
             });    
         }
+  }
+
+function mutated_genes_in_study(){
+    try{
+        var cancerstudyID = prompt("Please enter Cancer StudyID ", "gbm_tcga")
+
+        if (cancerstudyID == null || cancerstudyID == "") {
+            throw new Error("User cancelled the prompt.");
+        }else {
+            cancerstudyID = cancerstudyID;
+        }    
+    }
+    catch(e){
+        alert(e.message);
+    }
+
+    filename = "mutated_genes_in_study_"+ cancerstudyID  
+
+    downloadurl = "http://www.cbioportal.org/api/studies/"+cancerstudyID+"/significantly-mutated-genes?projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+    console.log(downloadurl);
+                  
+    if (confirm('Do you want to download CSV data?')) {
+        $(document).ready(function() {
+        var JSONData = $.getJSON(downloadurl, function(data) {
+            var items = data;            
+            const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+            const header = Object.keys(items[0]);
+            let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            //let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            //Download the file as CSV
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff", csv]);
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            downloadLink.download = filename + ".csv";  //Name the file here
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+           })
+        })
+    }
+    else {
+            promise = makePromise(downloadurl);
+            promise.then(function(result) {
+            console.log(result);        
+            return
+            }, function(err) {
+            console.log(err);
+            });    
+        }
+
+  }
+
+function blood_combinedgeneexp_charts(samplelistid, molecularprofileid, sampleID,airbubble,blood,ink){
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_rna_seq_v2_mrna_median_Zscores";   
+        //entrezGeneId = "5728"; //1956=EGFR, 5728=PTEN, PDGFRA=5156, TP53=7157    
+        PTEN_gene='5728';
+        EGFR_gene='1956';
+        PDGFRA_gene='5156';
+        TP53_gene='7157';
+        EPHB3_gene='2049';
+        TLR2_gene = '7097';
+        airbubble = airbubble;
+        blood=blood;
+        ink=ink;                
+        geneexp_5728 = geneexp_data(molecularprofileid, samplelistid, PTEN_gene, sampleID);
+        geneexp_1956 = geneexp_data(molecularprofileid, samplelistid, EGFR_gene, sampleID);
+        geneexp_5156 = geneexp_data(molecularprofileid, samplelistid, PDGFRA_gene, sampleID);
+        geneexp_7157 = geneexp_data(molecularprofileid, samplelistid, TP53_gene, sampleID);
+        geneexp_2049 = geneexp_data(molecularprofileid, samplelistid, EPHB3_gene, sampleID);
+        geneexp_7097 = geneexp_data(molecularprofileid, samplelistid, TLR2_gene, sampleID);
+
+        var PTEN_gene = {
+          x: blood,
+          y: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097,
+          type: 'scatter',
+          name: 'bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]
+        };
+
+        var data =[PTEN_gene];
+
+        var layout = {title: "PTEN-PDGFRA-EGFR-TP53-EPHB3-TLR2 combined GeneExpressions for TCGA Bloody slides",
+          xaxis: {
+                title: {
+                  text: 'Blood',
+                  font: {
+                    family: 'Courier New, monospace',
+                    size: 18,
+                    color: '#7f7f7f'
+                  }
+                },
+              },
+          yaxis: {
+                title: {
+                  text: 'PTEN TP53 PDGFRA EGFR EPHB3 TLR2 Gene Expression',
+                  font: {
+                    family: 'Courier New, monospace',
+                    size: 18,
+                    color: '#7f7f7f'
+                  }
+                }
+              },
+        };
+        
+        Plotly.newPlot("plotly_div", data, layout);
+
+}
+
+function geneexp_data(molecularprofileid,sampleid,entrezGeneId,patientID){
+
+    molecularProfileId = molecularprofileid;
+    sampleListId = sampleid;
+    entrezGeneId = entrezGeneId
+
+    downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/molecular-data?sampleListId="+sampleListId+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
+    promise = makePromise(downloadurl);
+    promise.then(function(result){        
+        var JSONData = $.getJSON(downloadurl, function(data){
+        var items = data;    
+        const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+        const header = Object.keys(items[0]);
+        let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
+        csv.unshift(header.join(','));
+        csv = csv.join('\r\n');
+
+        lines = csv.split(/\r\n|\n/);
+
+        var uniqueSampleKey = [];
+        var uniquePatientKey = [];
+        var entrezGeneId = [];
+        var molecularprofileid = [];
+        var sampleId = [];
+        var patientId = [];
+        var studyId=[];
+        var geneexp = [];
+
+        var headings = lines[0].split('');
+
+        for (var j=1; j<lines.length; j++) {
+        var values = lines[j].split(''); // Split up the comma seperated values
+           // We read the key,1st, 2nd and 3rd rows 
+           uniqueSampleKey.push(parseFloat(values[0]));
+           uniquePatientKey.push(parseFloat(values[1])); 
+           entrezGeneId.push(parseFloat(values[2]));
+           molecularprofileid.push(parseFloat(values[3]));
+           sampleId.push(parseFloat(values[0]));
+           patientId.push(parseFloat(values[1])); 
+           studyId.push(parseFloat(values[2]));
+           geneexp.push(parseFloat(values[3]));
+        }
+        
+        if (patientId = patientID){
+            geneexp = geneexp;
+            return geneexp;
+        }
+        
+    })
+    
+    })
+
+}
+
+function blood_multigeneexp_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink){
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_rna_seq_v2_mrna_median_Zscores";   
+        //entrezGeneId = "5728"; //1956=EGFR, 5728=PTEN, PDGFRA=5156, TP53=7157    
+        PTEN_gene='5728';
+        EGFR_gene='1956';
+        PDGFRA_gene='5156';
+        TP53_gene='7157';
+        EPHB3_gene = '2049';
+        TLR2_gene = '7097';
+        airbubble = airbubble;
+        blood=blood;
+        ink=ink;                
+        geneexp_5728 = geneexp_data(molecularprofileid, samplelistid, PTEN_gene, patientID);
+        geneexp_1956 = geneexp_data(molecularprofileid, samplelistid, EGFR_gene, patientID);
+        geneexp_5156 = geneexp_data(molecularprofileid, samplelistid, PDGFRA_gene, patientID);
+        geneexp_7157 = geneexp_data(molecularprofileid, samplelistid, TP53_gene, patientID);
+        geneexp_2049 = geneexp_data(molecularprofileid, samplelistid, EPHB3_gene, patientID);
+        geneexp_7097 = geneexp_data(molecularprofileid, samplelistid, TLR2_gene, patientID);
+
+
+        var PTEN_gene = {
+          x: blood,
+          y: geneexp_5728,          
+          type: 'scatter',
+          name: 'PTEN_bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]
+        };
+
+        var PDGFRA_gene = {
+          x: blood,
+          y: geneexp_7157,
+          xaxis: 'x2',          
+          yaxis: 'y2',                              
+          type: 'scatter',
+          name: 'PDGFRA_bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]
+
+        };
+
+        var EGFR_gene = {
+          x: blood,
+          y: geneexp_5156,
+          xaxis: 'x3',  
+          yaxis: 'y3',
+          type: 'scatter',
+          name: 'EGFR_bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]
+
+        };
+
+        var TP53_gene = {
+          x: blood,
+          y: geneexp_7157,
+          xaxis: 'x4',
+          yaxis: 'y4',         
+          type: 'scatter',
+          name: 'TP53_bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]        };
+
+        var EPHB3_gene = {
+          x: blood,
+          y: geneexp_2049,
+          xaxis: 'x5',  
+          yaxis: 'y5',
+          type: 'scatter',
+          name: 'EPHB3_bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]
+
+        };
+
+        var TLR2_gene = {
+          x: blood ,
+          y: geneexp_7097,
+          xaxis: 'x6',
+          yaxis: 'y6',         
+          type: 'scatter',
+          name: 'TLR2_bloody',
+          mode: 'markers',
+          transforms: [{
+            type: 'aggregate',
+            groups: geneexp_5728, geneexp_7157, geneexp_5156, geneexp_1956, geneexp_2049,geneexp_7097, sampleID,
+             aggregations: [
+                  {target: 'y', func: 'avg', enabled: true},
+                ]
+            }]
+        };
+
+        var data = [PTEN_gene, PDGFRA_gene, EGFR_gene, TP53_gene, EPHB3_gene, TLR2_gene];
+
+        var layout = {
+          grid: {rows: 2, columns: 3, pattern: 'independent'},
+          yaxis: {title:'PTEN Expresson'},
+          yaxis2: {title: 'PDGFRA Expression'},
+          yaxis3: {title: 'EGFR Expression'},
+          yaxis4: {title: 'TP53 Expression'},
+          yaxis5: {title: 'EPHB3 Expression'},
+          yaxis6: {title: 'TLR2 Expression'}           
+        
+        };
+
+        Plotly.newPlot("plotly_div", data, layout);
+
+}
+
+function pten_3d_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink){
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_rna_seq_v2_mrna_median_Zscores";   
+        //entrezGeneId = "5728"; //1956=EGFR, 5728=PTEN, PDGFRA=5156, TP53=7157    
+        PTEN_gene='5728';
+        EGFR_gene='1956';
+        PDGFRA_gene='5156';
+        TP53_gene='7157';
+        EPHB3_gene = '2049';
+        TLR2_gene = '7097';
+        airbubble = airbubble;
+        blood=blood;
+        ink=ink;                
+        geneexp_5728 = geneexp_data(molecularprofileid, samplelistid, PTEN_gene, patientID);
+        geneexp_1956 = geneexp_data(molecularprofileid, samplelistid, EGFR_gene, patientID);
+        geneexp_5156 = geneexp_data(molecularprofileid, samplelistid, PDGFRA_gene, patientID);
+        geneexp_7157 = geneexp_data(molecularprofileid, samplelistid, TP53_gene, patientID);
+        geneexp_2049 = geneexp_data(molecularprofileid, samplelistid, EPHB3_gene, patientID);
+        geneexp_7097 = geneexp_data(molecularprofileid, samplelistid, TLR2_gene, patientID);
+
+
+        // var PTEN_gene = {
+        //     x:patientID, y: geneexp_5728, z: blood,
+        //     mode: 'markers',
+        //     marker: {
+        //         size: 12,
+        //         line: {
+        //         color: 'rgba(217, 217, 217, 0.14)',
+        //         width: 0.5},
+        //         opacity: 0.8},
+        //     type: 'scatter3d'
+        // };
+
+        // var EGFR_gene = {
+        //     x:patientID, y: geneexp_1956, z: blood,
+        //     mode: 'markers',
+        //     marker: {
+        //         color: 'rgb(127, 127, 127)',
+        //         size: 12,
+        //         symbol: 'circle',
+        //         line: {
+        //         color: 'rgb(204, 204, 204)',
+        //         width: 1},
+        //         opacity: 0.8},
+        //     type: 'scatter3d'
+        // };
+
+        // console.log("crossed plotting");
+
+        // var data = [PTEN_gene, EGFR_gene];
+        // var layout = {margin: {
+        //     l: 0,
+        //     r: 0,
+        //     b: 0,
+        //     t: 0
+        //   }};
+
+        $(function() {
+            $( "#dialog" ).dialog();
+        });
+
+        Plotly.newPlot('dialog', [{
+          type: 'scatter3d',
+          mode: 'lines',
+          x:patientID, y: geneexp_1956, z: blood * 5,
+          opacity: 1,
+          line: {
+                width: 6,                
+                reversescale: false
+                }
+            }], {
+          height: 640
+        });
+
+
+
+        // var layout = {
+        //   grid: {rows: 2, columns: 3, pattern: 'independent'},
+        //   yaxis: {title:'PTEN Expresson'},
+        //   yaxis2: {title: 'PDGFRA Expression'},
+        //   yaxis3: {title: 'EGFR Expression'},
+        //   yaxis4: {title: 'TP53 Expression'},
+        //   yaxis5: {title: 'EPHB3 Expression'},
+        //   yaxis6: {title: 'TLR2 Expression'}           
+        
+        // };
+
+    //    Plotly.newPlot("plotly_div", data, layout);
+        console.log("plotting done");
 }
