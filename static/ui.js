@@ -69,6 +69,63 @@ var rajsFirstDataView = {
     }
 }
 
+var bloodyDataView = {
+    view: "dataview",
+    id: "bloodyDataview",
+    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
+    type: "smallThumb",  
+    //'onAfterLoad': function(id){}         
+    "select": true,
+    "multiselect": true,
+    "on": {
+        'onAfterSelect': function(id) {
+            // var ar_selected = $$('slideDataview').select();
+            // multi_select(ar_selected);  
+            var ar_selected = $$("bloodyDataview").getSelectedItem(true);
+                if (ar_selected.length == 1) {
+                    single_select(ar_selected[0])
+                } else {
+                    multi_select(ar_selected)
+                }
+             }
+    },
+    scheme: {
+        $init: function(obj) {
+            //create a shorter abbreviation for each item
+            obj['slideAbbrev'] = obj['name'].split(".")[0];
+        }
+    }
+}
+
+var nonbloodyDataview = {
+    view: "dataview",
+    id: "nonbloodyDataview",
+    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
+    type: "smallThumb",    
+    "select": true,
+    "multiselect": true,
+    "on": {
+        'onAfterSelect': function(id) {
+            // var ar_selected = $$('slideDataview').select();
+            // multi_select(ar_selected);  
+            var ar_selected = $$("nonbloodyDataview").getSelectedItem(true);
+                if (ar_selected.length == 1) {
+                    single_select(ar_selected[0])
+                } else {
+                    multi_select(ar_selected)
+                }
+             }
+    },
+    scheme: {
+        $init: function(obj) {
+            //create a shorter abbreviation for each item
+            obj['slideAbbrev'] = obj['name'].split(".")[0];
+        }
+    }
+}
+
 function makePromise(url) {    
     return new webix.promise(function(success, fail) {
         webix.ajax(url, function(text) {
@@ -274,8 +331,8 @@ var dataViewControls = {
             label: "Bloody Slides",
             click: function(id) {
                 webix.message("Bloody Slides")
-                $$('slideDataview').define('type', 'bloodySlides');
-                $$('slideDataview').render();
+                $$('bloodyDataview').define('type', 'smallThumb');
+                $$('bloodyDataview').render();
 
             }
         },
@@ -285,8 +342,8 @@ var dataViewControls = {
             label: "Non Bloody Slides",
             click: function(id) {
                 webix.message("Non Bloody Slides")
-                $$('slideDataview').define('type', 'nonBloodySlides');
-                $$('slideDataview').render();
+                $$('nonbloodyDataview').define('type', 'smallThumb');
+                $$('nonbloodyDataview').render();
             }
         },
         {
@@ -295,7 +352,7 @@ var dataViewControls = {
             label: "Random Slides",
             click: function(id) {
                 webix.message("Random Slides")
-                $$('slideDataview').define('type', 'randomSlides');
+                $$('slideDataview').define('type', 'smallThumb');
                 $$('slideDataview').render();
             }
         }
