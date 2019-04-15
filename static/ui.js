@@ -46,8 +46,7 @@ var rajsFirstDataView = {
     id: "slideDataview",
     //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
     url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-    type: "smallThumb",
-
+    type: "smallThumb",    
     "select": true,
     "multiselect": true,
     "on": {
@@ -67,8 +66,6 @@ var rajsFirstDataView = {
             //create a shorter abbreviation for each item
             obj['slideAbbrev'] = obj['name'].split(".")[0];
         }
-
-
     }
 }
 
@@ -273,23 +270,32 @@ function multi_select(ar_selected) {
 var dataViewControls = {
     cols: [{
             view: "button",
-            id: "btnSmallThumb",
-            label: "smallThumbs",
+            id: "btnBloodySlides",
+            label: "Bloody Slides",
             click: function(id) {
-                webix.message("small Raj")
-                $$('slideDataview').define('type', 'smallThumb');
+                webix.message("Bloody Slides")
+                $$('slideDataview').define('type', 'bloodySlides');
                 $$('slideDataview').render();
 
             }
         },
         {
             view: "button",
-            id: "btnLargeThumb",
-            label: "largeThumbs",
+            id: "btnNonBloodySlides",
+            label: "Non Bloody Slides",
             click: function(id) {
-
-                webix.message("large Raj")
-                $$('slideDataview').define('type', 'bigThumb');
+                webix.message("Non Bloody Slides")
+                $$('slideDataview').define('type', 'nonBloodySlides');
+                $$('slideDataview').render();
+            }
+        },
+        {
+            view: "button",
+            id: "btnRandomSlides",
+            label: "Random Slides",
+            click: function(id) {
+                webix.message("Random Slides")
+                $$('slideDataview').define('type', 'randomSlides');
                 $$('slideDataview').render();
             }
         }
@@ -311,7 +317,7 @@ explistDT = {
                 spans:true,
                 select:"cell",
                 scrollX:false,               
-                url: ""
+                url: ""                
             };
 
 explist = {
@@ -496,8 +502,8 @@ webix.ui({
                             },                            
                         ]
                     },
-                    { view: "resizer" },
-                    explist,
+                    // { view: "resizer" },
+                    // explist,
                     { view: "resizer"},
                     { view: "template", content: "plotly_div" },
                     { view: "resizer"}                             
@@ -507,11 +513,31 @@ webix.ui({
 })
 
 $$("gene_options").attachEvent("onChange", function(newv,oldv){
+    genefunctions = $$("gene_functions").getInputNode().value 
     entrezGeneId = $$("gene_options").getValue();    
-    GeneName = $$("gene_options").getInputNode().value    
-    mrna_forgenes_charts(entrezGeneId, GeneName);
+    GeneName = $$("gene_options").getInputNode().value  
+
+    if (genefunctions == "mRNA Expression"){
+        mrna_forgenes_charts(entrezGeneId, GeneName);            
+    } else {
+        mutations_forgenes_charts(entrezGeneId, GeneName);
+    }
 });
 
+$$("gene_functions").attachEvent("onChange", function(newv,oldv){        
+    genefunctions = $$("gene_functions").getInputNode().value 
+    entrezGeneId = $$("gene_options").getValue();    
+    GeneName = $$("gene_options").getInputNode().value
+
+    if (genefunctions == "mRNA Expression"){
+        mrna_forgenes_charts(entrezGeneId, GeneName);            
+    } else {
+        mutations_forgenes_charts(entrezGeneId, GeneName);
+    }
+
+    
+        
+});
 
 });
 
@@ -3007,6 +3033,59 @@ function mrna_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,air
         Plotly.newPlot("plotly_div", data, layout);
 }
 
+function mutations_forgenes_charts(entrezGeneId, GeneName){
+
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_mutations";   
+
+        entrezGeneId = entrezGeneId;
+        GeneName = GeneName;
+          
+        downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/mutations?sampleListId="+samplelistid+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+        
+        promise = makePromise(downloadurl);
+
+        promise.then(function(result){        
+            var JSONData = $.getJSON(downloadurl, function(data){
+            var items = data;
+            
+            var mrnavalue = [];
+            var sampleID = [];
+            var mutationtype = [];
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                    sampleID[i] = item['sampleId'];
+                    mutationtype[i] = item['mutationType'];
+                    entrezGeneId[i] = item['entrezGeneId'];                    
+                   }      
+
+            xvalue = mutationtype;
+            //console.log(xvalue);            
+            yvalue = entrezGeneId;
+            //console.log(yvalue);
+
+            hovertext = GeneName + " Mutations";
+
+            var data = [{
+                type: 'scatter',
+                x: xvalue,
+                y: yvalue,
+                mode: 'markers',
+                transforms: [{
+                    type: 'groupby',
+                    groups: xvalue
+                }]
+            }]
+
+            var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
+
+            Plotly.newPlot("plotly_div", data, layout);
+          })
+      })
+
+}
+
 function mrna_forgenes_charts(entrezGeneId, GeneName){
 
         samplelistid = "gbm_tcga_all";        
@@ -3025,22 +3104,29 @@ function mrna_forgenes_charts(entrezGeneId, GeneName){
             var items = data;
             
             var mrnavalue = [];
+            var sampleID = [];
 
             for (var i = 0; i < items.length; i++) {
                     item = items[i]; 
+                    sampleID[i] = item['sampleId'];
                     mrnavalue[i] = item['value'];                
                    }      
 
-            var xvalue = GeneName;
-            var yvalue = mrnavalue;
+            xvalue = sampleID;
+            //console.log(xvalue);            
+            yvalue = mrnavalue;
+            //console.log(yvalue);
+
+            hovertext = GeneName + " mRNA Expression Values"
 
             var mrna= {
                     x: xvalue,
                     y: yvalue,
-                    type: 'bar',
-                    text:yvalue.map(String),
-                    textposition:'auto',
-                    hoverinfo:'MRNA Expression Values',
+                    mode: 'lines+markers',
+                    type: 'scatter',
+                    text: xvalue,
+                    textposition: 'auto',
+                    hoverinfo: xvalue,                                        
                     opacity: 0.5,
                      marker: {
                         color: 'rgb(158,202,225)',
@@ -3050,9 +3136,10 @@ function mrna_forgenes_charts(entrezGeneId, GeneName){
                         }
                       }
                 };
+
             var data = [mrna];
 
-            var layout = {title: "MRNA Expression for Genes",  xaxis: {tickangle: -45 }};
+            var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
 
             Plotly.newPlot("plotly_div", data, layout);
           })
