@@ -69,62 +69,72 @@ var rajsFirstDataView = {
     }
 }
 
-var bloodyDataView = {
-    view: "dataview",
-    id: "bloodyDataview",
-    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-    type: "smallThumb",  
-    //'onAfterLoad': function(id){}         
-    "select": true,
-    "multiselect": true,
-    "on": {
-        'onAfterSelect': function(id) {
-            // var ar_selected = $$('slideDataview').select();
-            // multi_select(ar_selected);  
-            var ar_selected = $$("bloodyDataview").getSelectedItem(true);
-                if (ar_selected.length == 1) {
-                    single_select(ar_selected[0])
-                } else {
-                    multi_select(ar_selected)
-                }
-             }
-    },
-    scheme: {
-        $init: function(obj) {
-            //create a shorter abbreviation for each item
-            obj['slideAbbrev'] = obj['name'].split(".")[0];
-        }
-    }
-}
+// var bloodyDataView = {
+//     view: "dataview",
+//     id: "bloodyDataview",
+//     //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+//     url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
+//     type: "smallThumb", 
+//     "select": true,
+//     "multiselect": true, 
+//     "on":{
+//         'onAfterLoad': function(id){
+//             $$("slideDataview").data.each(function(obj){                
+//                 var matched_records = [];
+//                 for each (var item in obj){
+//                     if (item.meta.tags['Blood'] == 'Yes' ){
+//                         matched_records = matched_records[item]
+//                     }
+//                 }
 
-var nonbloodyDataview = {
-    view: "dataview",
-    id: "nonbloodyDataview",
-    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-    type: "smallThumb",    
-    "select": true,
-    "multiselect": true,
-    "on": {
-        'onAfterSelect': function(id) {
-            // var ar_selected = $$('slideDataview').select();
-            // multi_select(ar_selected);  
-            var ar_selected = $$("nonbloodyDataview").getSelectedItem(true);
-                if (ar_selected.length == 1) {
-                    single_select(ar_selected[0])
-                } else {
-                    multi_select(ar_selected)
-                }
-             }
-    },
-    scheme: {
-        $init: function(obj) {
-            //create a shorter abbreviation for each item
-            obj['slideAbbrev'] = obj['name'].split(".")[0];
-        }
-    }
-}
+//             },
+//         'onAfterSelect': function(id) {
+//             // var ar_selected = $$('slideDataview').select();
+//             // multi_select(ar_selected);  
+//             var ar_selected = $$("slideDataview").getSelectedItem(true);
+//                 if (ar_selected.length == 1) {
+//                     single_select(ar_selected[0])
+//                 } else {
+//                     multi_select(ar_selected)
+//                 }
+//              }
+//         }
+//     },    
+//     scheme: {
+//         $init: function(obj) {
+//             //create a shorter abbreviation for each item
+//             obj['slideAbbrev'] = obj['name'].split(".")[0];
+//         }
+//     }
+// }
+
+// var nonbloodyDataview = {
+//     view: "dataview",
+//     id: "nonbloodyDataview",
+//     //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+//     url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
+//     type: "smallThumb",    
+//     "select": true,
+//     "multiselect": true,
+//     "on": {
+//         'onAfterSelect': function(id) {
+//             // var ar_selected = $$('slideDataview').select();
+//             // multi_select(ar_selected);  
+//             var ar_selected = $$("nonbloodyDataview").getSelectedItem(true);
+//                 if (ar_selected.length == 1) {
+//                     single_select(ar_selected[0])
+//                 } else {
+//                     multi_select(ar_selected)
+//                 }
+//              }
+//     },
+//     scheme: {
+//         $init: function(obj) {
+//             //create a shorter abbreviation for each item
+//             obj['slideAbbrev'] = obj['name'].split(".")[0];
+//         }
+//     }
+// }
 
 function makePromise(url) {    
     return new webix.promise(function(success, fail) {
@@ -316,7 +326,7 @@ function multi_select(ar_selected) {
         //pten_3d_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink);      
         //blood_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,airbubble,blood,ink)
         //blood_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink)  
-        mrna_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink)
+        mrna_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID, airbubble, blood, ink)
         //mrna_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,airbubble,blood,ink)            
    } )//end of slideRecords
     console.log(patientID)
@@ -331,9 +341,15 @@ var dataViewControls = {
             label: "Bloody Slides",
             click: function(id) {
                 webix.message("Bloody Slides")
-                $$('bloodyDataview').define('type', 'smallThumb');
-                $$('bloodyDataview').render();
-
+                $$("slideDataview").data.each(function(obj){                                        
+                    var blood = obj.meta.tags['Blood'];                                        
+                    if (blood == 'Yes'){                                                                
+                        var matched_records = $$("slideDataview").getItem(obj.id)                        
+                        $$('slideDataview').define({data:matched_records})                        
+                        $$('slideDataview').refresh();
+                    }
+                    
+                })               
             }
         },
         {
@@ -342,8 +358,15 @@ var dataViewControls = {
             label: "Non Bloody Slides",
             click: function(id) {
                 webix.message("Non Bloody Slides")
-                $$('nonbloodyDataview').define('type', 'smallThumb');
-                $$('nonbloodyDataview').render();
+                $$("slideDataview").data.each(function(obj){                                        
+                    var blood = obj.meta.tags['Blood'];                                        
+                    if (blood == 'Not Sure'){                                                                        
+                        var matched_records = $$("slideDataview").getItem(obj.id)                        
+                        $$('slideDataview').define({data:matched_records})                        
+                        $$('slideDataview').refresh();
+                    }
+                    
+                })
             }
         },
         {
@@ -3117,23 +3140,24 @@ function mutations_forgenes_charts(entrezGeneId, GeneName){
                     entrezGeneId[i] = item['entrezGeneId'];                    
                    }      
 
-            xvalue = mutationtype;
-            //console.log(xvalue);            
-            yvalue = entrezGeneId;
-            //console.log(yvalue);
+            yvalue = mutationtype;            
+            //xvalue = entrezGeneId;            
+            xvalue = sampleID;            
 
             hovertext = GeneName + " Mutations";
 
             var data = [{
-                type: 'scatter',
+                type: 'bar',
                 x: xvalue,
                 y: yvalue,
                 mode: 'markers',
+                orderby: sampleID,
                 transforms: [{
                     type: 'groupby',
-                    groups: xvalue
+                    groups: yvalue
                 }]
             }]
+
 
             var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
 
@@ -3179,9 +3203,10 @@ function mrna_forgenes_charts(entrezGeneId, GeneName){
             var mrna= {
                     x: xvalue,
                     y: yvalue,
-                    mode: 'lines+markers',
-                    type: 'scatter',
+                    mode: 'markers',
+                    type: 'bar',
                     text: xvalue,
+                    orderby: xvalue,
                     textposition: 'auto',
                     hoverinfo: xvalue,                                        
                     opacity: 0.5,
