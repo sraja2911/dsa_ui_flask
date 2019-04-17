@@ -69,44 +69,51 @@ var rajsFirstDataView = {
     }
 }
 
-// var bloodyDataView = {
-//     view: "dataview",
-//     id: "bloodyDataview",
-//     //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-//     url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-//     type: "smallThumb", 
-//     "select": true,
-//     "multiselect": true, 
-//     "on":{
-//         'onAfterLoad': function(id){
-//             $$("slideDataview").data.each(function(obj){                
-//                 var matched_records = [];
-//                 for each (var item in obj){
-//                     if (item.meta.tags['Blood'] == 'Yes' ){
-//                         matched_records = matched_records[item]
-//                     }
-//                 }
+var bloodyDataView = {
+    view: "dataview",
+    id: "bloodyDataview",
+    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
+    type: "smallThumb", 
+    "select": true,
+    "multiselect": true, 
+    "on":{
+        'onBeforeLoad': function(id){
+            $$("bloodyDataview").data.each(function(obj){                                        
+                    var blood = obj.meta.tags['Blood'];                                        
+                    if (blood == 'Yes'){       
+                        console.log(blood);
+                        console.log(obj.id);                                                                                 
+                        var matched_records = $$("bloodyDataview").getItem(obj.id)                        
+                        console.log(matched_records)
+                        $$('bloodyDataview').define({data:matched_records})  
+                        $$('bloodyDataview').define('type', 'smallThumb');                      
+                        $$('bloodyDataview').render();
+                    }
+                    
+                })
 
-//             },
-//         'onAfterSelect': function(id) {
-//             // var ar_selected = $$('slideDataview').select();
-//             // multi_select(ar_selected);  
-//             var ar_selected = $$("slideDataview").getSelectedItem(true);
-//                 if (ar_selected.length == 1) {
-//                     single_select(ar_selected[0])
-//                 } else {
-//                     multi_select(ar_selected)
-//                 }
-//              }
-//         }
-//     },    
-//     scheme: {
-//         $init: function(obj) {
-//             //create a shorter abbreviation for each item
-//             obj['slideAbbrev'] = obj['name'].split(".")[0];
-//         }
-//     }
-// }
+            },
+        'onAfterSelect': function(id) {
+            // var ar_selected = $$('slideDataview').select();
+            // multi_select(ar_selected);  
+            var ar_selected = $$("slideDataview").getSelectedItem(true);
+                if (ar_selected.length == 1) {
+                    single_select(ar_selected[0])
+                } else {
+                    multi_select(ar_selected)
+                }
+             }
+        }
+    }   
+    // scheme: {
+    //       $init: function(obj) {
+    //         //create a shorter abbreviation for each item
+    //         obj['slideAbbrev'] = obj['name'].split(".")[0];
+    //     }
+    // }
+//}
+
 
 // var nonbloodyDataview = {
 //     view: "dataview",
@@ -341,15 +348,21 @@ var dataViewControls = {
             label: "Bloody Slides",
             click: function(id) {
                 webix.message("Bloody Slides")
+                // rajList = []                
                 $$("slideDataview").data.each(function(obj){                                        
                     var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Yes'){                                                                
+                    if (blood == 'Yes'){                                                                                        
+                        console.log(obj.id)   
+                        // rajList.push($$("slideDataview").getItem(obj.id)   )                     
                         var matched_records = $$("slideDataview").getItem(obj.id)                        
-                        $$('slideDataview').define({data:matched_records})                        
-                        $$('slideDataview').refresh();
+                        console.log(matched_records)                        
+                        $$('slideDataview').define({data:matched_records})  
                     }
                     
-                })               
+                }) 
+                // $$("slideDataview").clearAll()
+                // $$("slideDataview").laod(rajList) 
+                $$('slideDataview').refresh();        
             }
         },
         {
@@ -361,12 +374,14 @@ var dataViewControls = {
                 $$("slideDataview").data.each(function(obj){                                        
                     var blood = obj.meta.tags['Blood'];                                        
                     if (blood == 'Not Sure'){                                                                        
+                        console.log(obj.id)
                         var matched_records = $$("slideDataview").getItem(obj.id)                        
-                        $$('slideDataview').define({data:matched_records})                        
-                        $$('slideDataview').refresh();
+                        console.log(matched_records)
+                        $$('slideDataview').define({data:matched_records})                          
                     }
                     
                 })
+                $$('slideDataview').render(obj.id);                        
             }
         },
         {
@@ -569,7 +584,8 @@ webix.ui({
                                 value:"1", 
                                 options:[   
                                     {id:1, value:"mRNA Expression"}, 
-                                    {id:2, value:"Mutations"}        
+                                    {id:2, value:"Mutations"}
+                                    //{id:3, value:"Discrete Copy Number Alterations"}        
                                 ] 
                             },                           
                             dataViewControls,
@@ -599,7 +615,9 @@ $$("gene_options").attachEvent("onChange", function(newv,oldv){
 
     if (genefunctions == "mRNA Expression"){
         mrna_forgenes_charts(entrezGeneId, GeneName);            
-    } else {
+    //} else if(genefunctions == "Discrete Copy Number Alterations"){
+    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    } else { 
         mutations_forgenes_charts(entrezGeneId, GeneName);
     }
 });
@@ -611,11 +629,11 @@ $$("gene_functions").attachEvent("onChange", function(newv,oldv){
 
     if (genefunctions == "mRNA Expression"){
         mrna_forgenes_charts(entrezGeneId, GeneName);            
-    } else {
+    // } else if(genefunctions == "Discrete Copy Number Alterations"){
+    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    } else { 
         mutations_forgenes_charts(entrezGeneId, GeneName);
-    }
-
-    
+    }   
         
 });
 
@@ -3113,12 +3131,64 @@ function mrna_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,air
         Plotly.newPlot("plotly_div", data, layout);
 }
 
+function dis_cna_forgenes_charts(entrezGeneId, GeneName){
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_gistic";   
+
+        entrezGeneId = entrezGeneId;
+        GeneName = GeneName;
+          
+        downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/discrete-copy-number?sampleListId="+samplelistid+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+        
+        promise = makePromise(downloadurl);
+
+        promise.then(function(result){        
+            var JSONData = $.getJSON(downloadurl, function(data){
+            var items = data;
+            
+            var alterationsvalue = [];
+            var sampleID = [];
+            var mutationtype = [];
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                    sampleID[i] = item['sampleId'];
+                    alterationsvalue[i] = item['alteration'];
+                    entrezGeneId[i] = item['entrezGeneId'];                    
+                   }      
+
+            //yvalue = alterationsvalue;            
+            yvalue = entrezGeneId;            
+            xvalue = sampleID;            
+
+            hovertext = "Discrete_copynumber_alterations per gene (GISTIC study)";
+
+            var data = [{
+                type: 'bar',
+                x: xvalue,
+                y: yvalue,
+                mode: 'markers',
+                //orderby: sampleID,
+                transforms: [{
+                    type: 'groupby',
+                    groups: yvalue
+                }]
+            }]
+
+
+            var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
+
+            Plotly.newPlot("plotly_div", data, layout);
+          })
+      })
+
+};
 function mutations_forgenes_charts(entrezGeneId, GeneName){
 
         samplelistid = "gbm_tcga_all";        
         molecularprofileid = "gbm_tcga_mutations";   
 
-        entrezGeneId = entrezGeneId;
+        //entrezGeneId = entrezGeneId;
         GeneName = GeneName;
           
         downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/mutations?sampleListId="+samplelistid+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
@@ -3129,9 +3199,9 @@ function mutations_forgenes_charts(entrezGeneId, GeneName){
             var JSONData = $.getJSON(downloadurl, function(data){
             var items = data;
             
-            var mrnavalue = [];
             var sampleID = [];
             var mutationtype = [];
+            var entrezGeneId = [];
 
             for (var i = 0; i < items.length; i++) {
                     item = items[i]; 
@@ -3158,10 +3228,15 @@ function mutations_forgenes_charts(entrezGeneId, GeneName){
                 }]
             }]
 
+            var data = [trace1, trace2];
 
-            var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
+            //var layout = {title: 'Mutations Report'};
+
+
+            var layout = {title: hovertext,  xaxis: {tickangle: -45 }, barmode: 'group'};
 
             Plotly.newPlot("plotly_div", data, layout);
+
           })
       })
 
