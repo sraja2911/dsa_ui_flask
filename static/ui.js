@@ -97,7 +97,7 @@ var bloodyDataView = {
         'onAfterSelect': function(id) {
             // var ar_selected = $$('slideDataview').select();
             // multi_select(ar_selected);  
-            var ar_selected = $$("slideDataview").getSelectedItem(true);
+            var ar_selected = $$("bloodyDataview").getSelectedItem(true);
                 if (ar_selected.length == 1) {
                     single_select(ar_selected[0])
                 } else {
@@ -115,33 +115,43 @@ var bloodyDataView = {
 //}
 
 
-// var nonbloodyDataview = {
-//     view: "dataview",
-//     id: "nonbloodyDataview",
-//     //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-//     url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-//     type: "smallThumb",    
-//     "select": true,
-//     "multiselect": true,
-//     "on": {
-//         'onAfterSelect': function(id) {
-//             // var ar_selected = $$('slideDataview').select();
-//             // multi_select(ar_selected);  
-//             var ar_selected = $$("nonbloodyDataview").getSelectedItem(true);
-//                 if (ar_selected.length == 1) {
-//                     single_select(ar_selected[0])
-//                 } else {
-//                     multi_select(ar_selected)
-//                 }
-//              }
-//     },
-//     scheme: {
-//         $init: function(obj) {
-//             //create a shorter abbreviation for each item
-//             obj['slideAbbrev'] = obj['name'].split(".")[0];
-//         }
-//     }
-// }
+var nonbloodyDataview = {
+    view: "dataview",
+    id: "nonbloodyDataview",
+    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
+    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
+    type: "smallThumb",    
+    "select": true,
+    "multiselect": true,
+    "on":{
+        'onBeforeLoad': function(id){
+            $$("bloodyDataview").data.each(function(obj){                                        
+                    var blood = obj.meta.tags['Blood'];                                        
+                    if (blood == 'Yes'){       
+                        console.log(blood);
+                        console.log(obj.id);                                                                                 
+                        var matched_records = $$("nonbloodyDataview").getItem(obj.id)                        
+                        console.log(matched_records)
+                        $$('nonbloodyDataview').define({data:matched_records})  
+                        $$('nonbloodyDataview').define('type', 'smallThumb');                      
+                        $$('nonbloodyDataview').render();
+                    }
+                    
+                })
+
+            },
+        'onAfterSelect': function(id) {
+            // var ar_selected = $$('slideDataview').select();
+            // multi_select(ar_selected);  
+            var ar_selected = $$("nonbloodyDataview").getSelectedItem(true);
+                if (ar_selected.length == 1) {
+                    single_select(ar_selected[0])
+                } else {
+                    multi_select(ar_selected)
+                }
+             }
+        }
+    }   
 
 function makePromise(url) {    
     return new webix.promise(function(success, fail) {
@@ -340,60 +350,140 @@ function multi_select(ar_selected) {
 
 }
 
+slideDataDT = {
+                view: "datatable",
+                autoConfig: true,
+                css: "checkbox_style",
+                id: "slidelist",
+                editable: true,
+                checkboxRefresh: true, 
+                spans:true,
+                select:"row",
+                multiselect: true,
+                scrollX:false,                                               
+                url : config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight,                
+            };
 
+slidelist = {
+    gravity: 5,
+    cols: [
+            {
+                view: "button",
+                id: "btnBloodySlides",
+                label: "Bloody Slides",                
+                click: function(id) {                
+                    webix.message("Bloody Slides");                    
+                    matched_records = [];                    
+                    console.log(url)                                    
+                    $$('slidelist').data.each(function(obj){                                        
+                        var blood = obj.meta.tags['Blood'];                                        
+                        if (blood == 'Yes'){
+                            $$("slidelist").clearAll()                                                                                        
+                            console.log(obj.id)
+                            matched_records.push($$("slidelist").getItem(obj.id))
+                            console.log(matched_records);                        
+                        }                       
+                    })                
+                    $$('slidelist').define({
+                                data: matched_records
+                                //template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
+                            });                 
+                    $$('slidelist').refresh();        
+                }
+            },
+            {
+                view: "button",
+                id: "btnNonBloodySlides",
+                label: "Non Bloody Slides",                            
+                click: function(id) {
+                    webix.message("Non Bloody Slides")
+                    matched_records = []                     
+                    console.log(url)                
+                    $$('slidelist').data.each(function(obj){                                        
+                        var blood = obj.meta.tags['Blood'];                                        
+                        if (blood == 'Yes'){
+                            $$("slidelist").clearAll()                                                                                        
+                            console.log(obj.id)
+                            matched_records.push($$("slidelist").getItem(obj.id))
+                            console.log(matched_records);                        
+                        }                       
+                    })                
+                    $$('slidelist').define({
+                                data: matched_records
+                                //template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
+                            });                 
+                    $$('slidelist').refreshColumns();        
+                }
+            },
+            {
+                view: "button",
+                id: "btnRandomSlides",
+                label: "Random Slides",
+                click: function(id) {
+                    webix.message("Random Slides")                    
+                }
+            }
+    ]
+}
+//}
 var dataViewControls = {
     cols: [{
             view: "button",
             id: "btnBloodySlides",
-            label: "Bloody Slides",
+            label: "Bloody Slides",           
             click: function(id) {
                 webix.message("Bloody Slides")
-                // rajList = []                
+                matched_records = []                
                 $$("slideDataview").data.each(function(obj){                                        
                     var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Yes'){                                                                                        
-                        console.log(obj.id)   
-                        // rajList.push($$("slideDataview").getItem(obj.id)   )                     
-                        var matched_records = $$("slideDataview").getItem(obj.id)                        
-                        console.log(matched_records)                        
-                        $$('slideDataview').define({data:matched_records})  
-                    }
-                    
-                }) 
-                // $$("slideDataview").clearAll()
-                // $$("slideDataview").laod(rajList) 
-                $$('slideDataview').refresh();        
+                    if (blood == 'Yes'){                        
+                        console.log(obj.id)                           
+                        matched_records.push($$("slideDataview").getItem(obj.id))
+                        console.log(matched_records);
+                        $$('slideDataview').define({
+                            data: matched_records,
+                            template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
+                        });                
+                        //$$('slideDataview').refresh();                        
+                    }                
+                })
+                // $$('slideDataview').clearAll(true)    
+                $$('slideDataview').refresh();                                        
             }
         },
         {
             view: "button",
             id: "btnNonBloodySlides",
-            label: "Non Bloody Slides",
+            label: "Non Bloody Slides",            
             click: function(id) {
                 webix.message("Non Bloody Slides")
+                matched_records = []
                 $$("slideDataview").data.each(function(obj){                                        
                     var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Not Sure'){                                                                        
-                        console.log(obj.id)
-                        var matched_records = $$("slideDataview").getItem(obj.id)                        
-                        console.log(matched_records)
-                        $$('slideDataview').define({data:matched_records})                          
-                    }
-                    
+                    if (blood == 'Not Sure'){                     
+                        console.log(obj.id)   
+                        matched_records.push($$("slideDataview").getItem(obj.id))
+                        console.log(matched_records);
+                        $$('slideDataview').define({
+                            data: matched_records,
+                            template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
+                        });                
+                        //$$('slideDataview').refresh();                        
+                    }                
                 })
-                $$('slideDataview').render(obj.id);                        
-            }
+                // $$('slideDataview').clearAll(true)    
+                 $$('slideDataview').refresh();                
+            }          
         },
         {
             view: "button",
             id: "btnRandomSlides",
             label: "Random Slides",
-            click: function(id) {
-                webix.message("Random Slides")
+            click: function(id) {                
                 $$('slideDataview').define('type', 'smallThumb');
-                $$('slideDataview').render();
-            }
-        }
+                $$('slideDataview').refresh();
+            }           
+        }        
     ]
 }
 
@@ -584,10 +674,11 @@ webix.ui({
                                 value:"1", 
                                 options:[   
                                     {id:1, value:"mRNA Expression"}, 
-                                    {id:2, value:"Mutations"}
-                                    //{id:3, value:"Discrete Copy Number Alterations"}        
+                                    {id:2, value:"Mutations"},
+                                    {id:3, value:"Discrete Copy Number Alterations"}        
                                 ] 
-                            },                           
+                            },
+                            //slidelist,                           
                             dataViewControls,
                             rajsFirstDataView,
                             {
@@ -615,8 +706,8 @@ $$("gene_options").attachEvent("onChange", function(newv,oldv){
 
     if (genefunctions == "mRNA Expression"){
         mrna_forgenes_charts(entrezGeneId, GeneName);            
-    //} else if(genefunctions == "Discrete Copy Number Alterations"){
-    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    } else if(genefunctions == "Discrete Copy Number Alterations"){
+        dis_cna_forgenes_charts(entrezGeneId, GeneName);
     } else { 
         mutations_forgenes_charts(entrezGeneId, GeneName);
     }
@@ -629,8 +720,8 @@ $$("gene_functions").attachEvent("onChange", function(newv,oldv){
 
     if (genefunctions == "mRNA Expression"){
         mrna_forgenes_charts(entrezGeneId, GeneName);            
-    // } else if(genefunctions == "Discrete Copy Number Alterations"){
-    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    } else if(genefunctions == "Discrete Copy Number Alterations"){
+        dis_cna_forgenes_charts(entrezGeneId, GeneName);
     } else { 
         mutations_forgenes_charts(entrezGeneId, GeneName);
     }   
@@ -3149,6 +3240,7 @@ function dis_cna_forgenes_charts(entrezGeneId, GeneName){
             var alterationsvalue = [];
             var sampleID = [];
             var mutationtype = [];
+            //var entrezGeneId = [];
 
             for (var i = 0; i < items.length; i++) {
                     item = items[i]; 
@@ -3164,11 +3256,11 @@ function dis_cna_forgenes_charts(entrezGeneId, GeneName){
             hovertext = "Discrete_copynumber_alterations per gene (GISTIC study)";
 
             var data = [{
-                type: 'bar',
+                type: 'scatter',
                 x: xvalue,
                 y: yvalue,
                 mode: 'markers',
-                //orderby: sampleID,
+                orderby: sampleID,
                 transforms: [{
                     type: 'groupby',
                     groups: yvalue
@@ -3228,7 +3320,7 @@ function mutations_forgenes_charts(entrezGeneId, GeneName){
                 }]
             }]
 
-            var data = [trace1, trace2];
+            //var data = [trace1, trace2];
 
             //var layout = {title: 'Mutations Report'};
 
