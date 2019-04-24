@@ -51,8 +51,6 @@ var rajsFirstDataView = {
     "multiselect": true,
     "on": {
         'onAfterSelect': function(id) {
-            // var ar_selected = $$('slideDataview').select();
-            // multi_select(ar_selected);  
             var ar_selected = $$("slideDataview").getSelectedItem(true);
                 if (ar_selected.length == 1) {
                     single_select(ar_selected[0])
@@ -68,90 +66,6 @@ var rajsFirstDataView = {
         }
     }
 }
-
-var bloodyDataView = {
-    view: "dataview",
-    id: "bloodyDataview",
-    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-    type: "smallThumb", 
-    "select": true,
-    "multiselect": true, 
-    "on":{
-        'onBeforeLoad': function(id){
-            $$("bloodyDataview").data.each(function(obj){                                        
-                    var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Yes'){       
-                        console.log(blood);
-                        console.log(obj.id);                                                                                 
-                        var matched_records = $$("bloodyDataview").getItem(obj.id)                        
-                        console.log(matched_records)
-                        $$('bloodyDataview').define({data:matched_records})  
-                        $$('bloodyDataview').define('type', 'smallThumb');                      
-                        $$('bloodyDataview').render();
-                    }
-                    
-                })
-
-            },
-        'onAfterSelect': function(id) {
-            // var ar_selected = $$('slideDataview').select();
-            // multi_select(ar_selected);  
-            var ar_selected = $$("bloodyDataview").getSelectedItem(true);
-                if (ar_selected.length == 1) {
-                    single_select(ar_selected[0])
-                } else {
-                    multi_select(ar_selected)
-                }
-             }
-        }
-    }   
-    // scheme: {
-    //       $init: function(obj) {
-    //         //create a shorter abbreviation for each item
-    //         obj['slideAbbrev'] = obj['name'].split(".")[0];
-    //     }
-    // }
-//}
-
-
-var nonbloodyDataview = {
-    view: "dataview",
-    id: "nonbloodyDataview",
-    //url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-    url: config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight, 
-    type: "smallThumb",    
-    "select": true,
-    "multiselect": true,
-    "on":{
-        'onBeforeLoad': function(id){
-            $$("bloodyDataview").data.each(function(obj){                                        
-                    var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Yes'){       
-                        console.log(blood);
-                        console.log(obj.id);                                                                                 
-                        var matched_records = $$("nonbloodyDataview").getItem(obj.id)                        
-                        console.log(matched_records)
-                        $$('nonbloodyDataview').define({data:matched_records})  
-                        $$('nonbloodyDataview').define('type', 'smallThumb');                      
-                        $$('nonbloodyDataview').render();
-                    }
-                    
-                })
-
-            },
-        'onAfterSelect': function(id) {
-            // var ar_selected = $$('slideDataview').select();
-            // multi_select(ar_selected);  
-            var ar_selected = $$("nonbloodyDataview").getSelectedItem(true);
-                if (ar_selected.length == 1) {
-                    single_select(ar_selected[0])
-                } else {
-                    multi_select(ar_selected)
-                }
-             }
-        }
-    }   
 
 function makePromise(url) {    
     return new webix.promise(function(success, fail) {
@@ -364,91 +278,14 @@ slideDataDT = {
                 url : config.BASE_URL + "/item?folderId=5ae351e792ca9a0020d95e50&limit=200&sort=lowerName&sortdir=1&height=" + thumbHeight,                
             };
 
-slidelist = {
-    gravity: 5,
-    cols: [
-            {
-                view: "button",
-                id: "btnBloodySlides",
-                label: "Bloody Slides",                
-                click: function(id) {                
-                    webix.message("Bloody Slides");                    
-                    matched_records = [];                    
-                    console.log(url)                                    
-                    $$('slidelist').data.each(function(obj){                                        
-                        var blood = obj.meta.tags['Blood'];                                        
-                        if (blood == 'Yes'){
-                            $$("slidelist").clearAll()                                                                                        
-                            console.log(obj.id)
-                            matched_records.push($$("slidelist").getItem(obj.id))
-                            console.log(matched_records);                        
-                        }                       
-                    })                
-                    $$('slidelist').define({
-                                data: matched_records
-                                //template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
-                            });                 
-                    $$('slidelist').refresh();        
-                }
-            },
-            {
-                view: "button",
-                id: "btnNonBloodySlides",
-                label: "Non Bloody Slides",                            
-                click: function(id) {
-                    webix.message("Non Bloody Slides")
-                    matched_records = []                     
-                    console.log(url)                
-                    $$('slidelist').data.each(function(obj){                                        
-                        var blood = obj.meta.tags['Blood'];                                        
-                        if (blood == 'Yes'){
-                            $$("slidelist").clearAll()                                                                                        
-                            console.log(obj.id)
-                            matched_records.push($$("slidelist").getItem(obj.id))
-                            console.log(matched_records);                        
-                        }                       
-                    })                
-                    $$('slidelist').define({
-                                data: matched_records
-                                //template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
-                            });                 
-                    $$('slidelist').refreshColumns();        
-                }
-            },
-            {
-                view: "button",
-                id: "btnRandomSlides",
-                label: "Random Slides",
-                click: function(id) {
-                    webix.message("Random Slides")                    
-                }
-            }
-    ]
-}
-//}
 var dataViewControls = {
     cols: [{
             view: "button",
             id: "btnBloodySlides",
             label: "Bloody Slides",           
             click: function(id) {
-                webix.message("Bloody Slides")
-                matched_records = []                
-                $$("slideDataview").data.each(function(obj){                                        
-                    var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Yes'){                        
-                        console.log(obj.id)                           
-                        matched_records.push($$("slideDataview").getItem(obj.id))
-                        console.log(matched_records);
-                        $$('slideDataview').define({
-                            data: matched_records,
-                            template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
-                        });                
-                        //$$('slideDataview').refresh();                        
-                    }                
-                })
-                // $$('slideDataview').clearAll(true)    
-                $$('slideDataview').refresh();                                        
+                webix.message("Bloody Slides ")
+                $$("slideDataview").filter( function(obj) { if(obj.meta.tags.Blood =="Yes") return true;  } )                
             }
         },
         {
@@ -457,31 +294,16 @@ var dataViewControls = {
             label: "Non Bloody Slides",            
             click: function(id) {
                 webix.message("Non Bloody Slides")
-                matched_records = []
-                $$("slideDataview").data.each(function(obj){                                        
-                    var blood = obj.meta.tags['Blood'];                                        
-                    if (blood == 'Not Sure'){                     
-                        console.log(obj.id)   
-                        matched_records.push($$("slideDataview").getItem(obj.id))
-                        console.log(matched_records);
-                        $$('slideDataview').define({
-                            data: matched_records,
-                            template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >"
-                        });                
-                        //$$('slideDataview').refresh();                        
-                    }                
-                })
-                // $$('slideDataview').clearAll(true)    
-                 $$('slideDataview').refresh();                
+                $$("slideDataview").filter( function(obj) { if(obj.meta.tags.Blood =="No") return true;  } )           
             }          
         },
         {
             view: "button",
             id: "btnRandomSlides",
             label: "Random Slides",
-            click: function(id) {                
-                $$('slideDataview').define('type', 'smallThumb');
-                $$('slideDataview').refresh();
+            click: function(id) {      
+                webix.message("Not Sure Slides")
+                $$("slideDataview").filter( function(obj) { if(obj.meta.tags.Blood =="Not Sure") return true;  } )                          
             }           
         }        
     ]
