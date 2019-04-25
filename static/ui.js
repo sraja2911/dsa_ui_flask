@@ -552,6 +552,65 @@ $$("gene_functions").attachEvent("onChange", function(newv,oldv){
 
 });
 
+function generic_cBioportal(){
+    $("#othercbiodialog").dialog({
+            autoOpen: true,            
+            buttons: {
+                
+                cancer_types_all: function() {
+                    cancer_types_all();
+                    $(this).dialog("close");
+                },
+                patients_all: function() {
+                    patients_all();
+                    $(this).dialog("close");
+                },
+                clinical_attributes:function(){
+                    clinical_attributes();
+                    $(this).dialog("close");
+                },
+                clinical_attributes_studyID:function(){
+                    clinical_attributes_studyID();
+                    $(this).dialog("close");
+                },
+                get_all_gene_panel:function(){
+                    get_all_gene_panel();
+                    $(this).dialog("close");
+                },                
+                molecular_profiles_all:function(){
+                    molecular_profiles_all();
+                    $(this).dialog("close");
+                },
+                molecular_profile_id:function(){
+                    molecular_profiles_id();
+                    $(this).dialog("close");
+                },
+                molecular_profiles_4_cancerstudyid:function(){
+                    molecular_profiles_4_cancerstudyid()();
+                    $(this).dialog("close");
+                },
+                molecular_mutations_profiles_4_cancerstudyid:function(){
+                    molecular_mutations_profiles_4_cancerstudyid();
+                    $(this).dialog("close");
+                },
+                discrete_copynumber_alterations: function() {
+                    discrete_copynumber_alterations();                    
+                    $(this).dialog("close");
+                },
+                gene_panelID: function() {
+                    gene_panelID();                    
+                    $(this).dialog("close");
+                },
+                main_CBioportal_Dialog: function() {
+                    $("#maindialog").dialog("open"); 
+                    $(this).dialog("close");                   
+                }
+            },
+            width: "600px"             
+            
+
+        });    
+}
 
 function clinical_Data_4_sample_studyID(patientID){
 try{
@@ -779,66 +838,6 @@ function clinical_Events(patientID){
             console.log(err);
             });    
         }
-}
-
-function generic_cBioportal(){
-    $("#othercbiodialog").dialog({
-            autoOpen: true,            
-            buttons: {
-                
-                cancer_types_all: function() {
-                    cancer_types_all();
-                    $(this).dialog("close");
-                },
-                patients_all: function() {
-                    patients_all();
-                    $(this).dialog("close");
-                },
-                clinical_attributes:function(){
-                    clinical_attributes();
-                    $(this).dialog("close");
-                },
-                clinical_attributes_studyID:function(){
-                    clinical_attributes_studyID();
-                    $(this).dialog("close");
-                },
-                get_all_gene_panel:function(){
-                    get_all_gene_panel();
-                    $(this).dialog("close");
-                },                
-                molecular_profiles_all:function(){
-                    molecular_profiles_all();
-                    $(this).dialog("close");
-                },
-                molecular_profile_id:function(){
-                    molecular_profiles_id();
-                    $(this).dialog("close");
-                },
-                molecular_profiles_4_cancerstudyid:function(){
-                    molecular_profiles_4_cancerstudyid()();
-                    $(this).dialog("close");
-                },
-                molecular_mutations_profiles_4_cancerstudyid:function(){
-                    molecular_mutations_profiles_4_cancerstudyid();
-                    $(this).dialog("close");
-                },
-                discrete_copynumber_alterations: function() {
-                    discrete_copynumber_alterations();                    
-                    $(this).dialog("close");
-                },
-                gene_panelID: function() {
-                    gene_panelID();                    
-                    $(this).dialog("close");
-                },
-                main_CBioportal_Dialog: function() {
-                    $("#maindialog").dialog("open"); 
-                    $(this).dialog("close");                   
-                }
-            },
-            width: "600px"             
-            
-
-        });    
 }
 
 function cancer_types_all(){
@@ -2646,16 +2645,6 @@ function mrnaexp_data_for_patients(molecularprofileid,sampleid,entrezGeneId,pati
     promise.then(function(result){        
         var JSONData = $.getJSON(downloadurl, function(data){
         var items = data;
-        // console.log(patientID)
-        // console.log (items)    
-        // const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-        // const header = Object.keys(items[0]);
-        // let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer).replace(/\\"/g, '""')));
-        // csv.unshift(header.join(','));
-        // csv = csv.join('\r\n');
-
-        // lines = csv.split(/\r\n|\n/);
-
         var uniqueSampleKey = [];
         var uniquePatientKey = [];
         var entrezGeneId = [];
@@ -2664,9 +2653,6 @@ function mrnaexp_data_for_patients(molecularprofileid,sampleid,entrezGeneId,pati
         var patientId = [];
         var studyId=[];
         var mrnavalue = [];
-
-        //var headings = lines[0].split('');
-        // var headings = items[0].split('');
         
         for (var i = 0; i < items.length; i++) {
             item = items[i];
@@ -2679,41 +2665,6 @@ function mrnaexp_data_for_patients(molecularprofileid,sampleid,entrezGeneId,pati
             }
     }
 
-        // var values = lines[j].split(''); // Split up the comma seperated values
-        //    // We read the key,1st, 2nd and 3rd rows 
-        //    uniqueSampleKey.push(parseFloat(values[0]));
-        //    uniquePatientKey.push(parseFloat(values[1])); 
-        //    entrezGeneId.push(parseFloat(values[2]));
-        //    molecularprofileid.push(parseFloat(values[3]));
-        //    sampleId.push(parseFloat(values[4]));
-        //    patientId.push(parseFloat(values[5])); 
-        //    studyId.push(parseFloat(values[6]));
-        //    mrnavalue.push(parseFloat(values[7]));
-
-        //    // console.log(patientID);
-        //    // console.log(patientId);
-        //    // console.log(mrnavalue);
-
-        //     if (patientId == patientID){
-        //         // console.log(patientID);
-        //         // console.log(patientId);
-        //         mrnavalue = mrnavalue;
-        //         // console.log(mrnavalue);
-        //     return mrnavalue;
-        //     }
-
-        // }
-
-        // console.log(patientID);
-        // console.log(patientId);
-        
-        // if (patientId == patientID){
-        //     // console.log(patientID);
-        //     // console.log(patientId);
-        //     mrnavalue = mrnavalue;
-        //     // console.log(mrnavalue);
-        //     return mrnavalue;
-        // }
         
     })
     
@@ -2722,31 +2673,6 @@ function mrnaexp_data_for_patients(molecularprofileid,sampleid,entrezGeneId,pati
 }
          
 function mrnaexp_data_for_gene(molecularprofileid,samplelistid,entrezGeneId){
-
-    // molecularProfileId = molecularprofileid;
-    // sampleListId = samplelistid;
-    // entrezGeneId = entrezGeneId
-
-    // downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularProfileId+"/molecular-data?sampleListId="+sampleListId+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
-    // promise = makePromise(downloadurl);
-
-    // promise.then(function(result){        
-    //     var JSONData = $.getJSON(downloadurl, function(data){
-    //     var items = data;
-        
-    //     var mrnavalue = [];
-
-    //     for (var i = 0; i < items.length; i++) {
-    //             item = items[i]; 
-    //             mrnavalue[i] = item['value'];                
-    //            }      
-    //     return mrnavalue;
-    //     console.log(mrnavalue);
-    //     })
-        
-    // })
-
-
 
 }
 
@@ -3232,8 +3158,7 @@ function mrna_combinedgeneexp_charts(samplelistid, molecularprofileid, sampleID,
         airbubble = airbubble;
         blood=blood;
         ink=ink;                
-        geneexp_5728 = mrnaexp_data(molecularprofileid, samplelistid, PTEN_gene, patientID);
-        // console.log(geneexp_5728);
+        geneexp_5728 = mrnaexp_data(molecularprofileid, samplelistid, PTEN_gene, patientID);        
         geneexp_1956 = mrnaexp_data(molecularprofileid, samplelistid, EGFR_gene, patientID);
         // console.log(geneexp_1956);
         geneexp_5156 = mrnaexp_data(molecularprofileid, samplelistid, PDGFRA_gene, patientID);
