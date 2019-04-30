@@ -510,9 +510,9 @@ webix.ui({
                                 label:"Group Comparisons Functions", 
                                 value:"1", 
                                 options:[   
-                                    {id:1, value:"mRNA Expression-Bloody vs Non-Bloody"}, 
-                                    {id:2, value:"Mutations-Bloody vs Non-Bloody"},
-                                    {id:3, value:"Discrete Copy Number Alterations-Bloody vs Non-Bloody"}        
+                                    {id:1, value:"mRNA Expression-lgg vs gbm"}, 
+                                    {id:2, value:"Mutations-lgg vs gbm"},
+                                    {id:3, value:"Discrete Copy Number Alterations-lgg vs gbm"}        
                                 ] 
                             },
                             {   
@@ -567,13 +567,17 @@ $$("gene_options").attachEvent("onChange", function(newv,oldv){
 $$("grp_cmp_functions").attachEvent("onChange", function(newv,oldv){
     genefunctions = $$("gene_functions").getInputNode().value 
     entrezGeneId = $$("gene_options").getValue();    
-    GeneName = $$("gene_options").getInputNode().value  
+    GeneName = $$("gene_options").getInputNode().value 
+    grp_cmp_functions = $$("grp_cmp_functions").getInputNode().value
 
-    if (genefunctions == "mRNA Expression"){
+    if (grp_cmp_functions == "mRNA Expression-lgg vs gbm"){
+        console.log("am in the mRNA group")
         mrna_forgenes_charts_grouped(entrezGeneId, GeneName);            
-    } else if(genefunctions == "Discrete Copy Number Alterations"){
+    } else if(grp_cmp_functions == "Discrete Copy Number Alterations-lgg vs gbm"){
+        console.log("am in the CNA group")
         dis_cna_forgenes_charts_grouped(entrezGeneId, GeneName);
-    } else { 
+    } else if(grp_cmp_functions == "Mutations-lgg vs gbm") { 
+        console.log("am in mutations group")
         mutations_forgenes_charts_grouped(entrezGeneId, GeneName);
     }
 });
@@ -3121,6 +3125,109 @@ function dis_cna_forgenes_charts(entrezGeneId, GeneName){
       })
 
 };
+
+function dis_cna_forgenes_charts_grouped(entrezGeneId, GeneName){
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_gistic";   
+
+        entrezGeneId = entrezGeneId;
+        GeneName = GeneName;
+          
+        downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/discrete-copy-number?sampleListId="+samplelistid+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+        
+        promise = makePromise(downloadurl);
+
+        samplelistidlgg = "lgg_tcga_all";
+        molecularprofileidlgg = "lgg_tcga_gistic"
+        downloadlgg = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileidlgg+"/discrete-copy-number?sampleListId="+samplelistidlgg+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+        promiselgg = makePromise(downloadlgg);
+
+
+        promise.then(function(result){        
+        promiselgg.then(function(result){
+            var JSONData = $.getJSON(downloadurl, function(data){
+            var items = data;
+            
+            var alterationsvalue = [];
+            var sampleID = [];
+            var mutationtype = [];
+            //var entrezGeneId = [];
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                    sampleID[i] = item['sampleId'];
+                    alterationsvalue[i] = item['alteration'];
+                    entrezGeneId[i] = item['entrezGeneId'];                    
+                   }      
+
+            //yvalue = alterationsvalue;            
+            yvalue = entrezGeneId;   
+            console.log(yvalue);        
+            xvalue = sampleID; 
+            console.log(xvalue);
+
+            var JSONlgg = $.getJSON(downloadlgg, function(data){
+            var itemslgg = data;
+            
+            var alterationsvaluelgg = [];
+            var sampleIDlgg = [];
+            var mutationtypelgg = [];
+            //var entrezGeneId = [];
+
+            for (var i = 0; i < itemslgg.length; i++) {
+                    itemlgg = itemslgg[i]; 
+                    sampleIDlgg[i] = itemlgg['sampleId'];
+                    alterationsvaluelgg[i] = itemlgg['alteration'];
+                    entrezGeneId[i] = itemlgg['entrezGeneId'];                    
+                   }      
+
+            //yvalue = alterationsvalue;            
+            yvaluelgg = entrezGeneId;            
+            console.log(yvaluelgg);
+            xvaluelgg = sampleID;
+            console.log(xvaluelgg);
+
+            hovertext = "Putative copy-number alterations from GISTIC";
+
+            var trace1 = { 
+                x: xvalue,
+                y: yvalue,
+                name: 'CNA - GBM values',
+                type: 'scatter',
+                transforms: [{
+                    type: 'sort',
+                    target: yvalue,
+                    order: 'ascending'
+                }]
+            };
+
+            var trace2 = {
+                x: xvaluelgg,
+                y: yvaluelgg,
+                name: 'CNA - lgg values',
+                type: 'scatter',
+                transforms: [{
+                    type: 'sort',
+                    target: yvaluelgg,
+                    order: 'ascending'
+                }]
+
+            };
+
+            var data = [trace1, trace2] 
+
+            var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
+
+            Plotly.newPlot("plotly_div", data, layout);
+
+            })
+
+          })
+        })
+      })
+
+};
+
 function mutations_forgenes_charts(entrezGeneId, GeneName){
 
         samplelistid = "gbm_tcga_all";        
@@ -3171,6 +3278,109 @@ function mutations_forgenes_charts(entrezGeneId, GeneName){
                 barmode: 'group'};
 
             Plotly.newPlot("plotly_div", data, layout);
+
+          })
+      })
+
+}
+
+function mutations_forgenes_charts_grouped(entrezGeneId, GeneName){        
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_mutations";   
+
+        //entrezGeneId = entrezGeneId;
+        GeneName = GeneName;
+          
+        downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/mutations?sampleListId="+samplelistid+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC";
+        
+        samplelistidlgg = "lgg_tcga_all";
+        molecularprofileidlgg = "lgg_tcga_mutations";
+        downloadlgg = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileidlgg+"/mutations?sampleListId="+samplelistidlgg+"&projection=SUMMARY&pageSize=10000000&pageNumber=0&direction=ASC"
+        
+        promise = makePromise(downloadurl);
+        promiselgg = makePromise(downloadlgg);
+
+        promise.then(function(result){        
+        promiselgg.then(function(result){
+
+            var JSONData = $.getJSON(downloadurl, function(data){
+            var items = data;
+            
+            var sampleID = [];
+            var mutationtype = [];
+            var entrezGeneId = [];
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                    sampleID[i] = item['sampleId'];
+                    mutationtype[i] = item['mutationType'];
+                    entrezGeneId[i] = item['entrezGeneId'];                    
+                   }      
+
+            yvalue = mutationtype;            
+            xvalue = sampleID;            
+
+            var JSONlgg = $.getJSON(downloadlgg, function(data){
+            var itemslgg = data;
+            
+            var sampleIDlgg = [];
+            var mutationtypelgg = [];
+            var entrezGeneIdlgg = [];
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                    sampleIDlgg[i] = item['sampleId'];
+                    mutationtypelgg[i] = item['mutationType'];
+                    entrezGeneId[i] = item['entrezGeneId'];                    
+                   }      
+
+            yvaluelgg = mutationtypelgg;            
+            xvaluelgg = sampleIDlgg;            
+
+            var trace1 = {
+              x: xvalue,
+              y: yvalue,
+              name: 'GBM Mutations',
+              type: 'bar'
+            };
+
+            var trace2 = {
+              x: xvaluelgg,
+              y: yvaluelgg,
+              name: 'lgg mutations',
+              type: 'bar'
+            };
+
+            var data = [trace1, trace2];
+
+            var layout = {barmode: 'group'};
+
+            Plotly.newPlot('myDiv', data, layout);
+
+
+            // hovertext = GeneName + " Mutations";
+
+            // var data = [{
+            //     type: 'bar',
+            //     x: xvalue,
+            //     y: yvalue,
+            //     mode: 'markers',
+            //     orderby: yvalue,
+            //     transforms: [{
+            //         type: 'groupby',
+            //         groups: yvalue
+            //     }]
+            // }]
+
+            // var layout = {
+            //     title: hovertext,
+            //     xaxis: {tickangle: -45},                 
+            //     barmode: 'group'};
+
+            // Plotly.newPlot("plotly_div", data, layout);
+
+            })
+            })
 
           })
       })
@@ -3252,7 +3462,15 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
         downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/molecular-data?sampleListId="+samplelistid+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
         promise = makePromise(downloadurl);
 
+        samplelistid1 = "lgg_tcga_all";        
+        molecularprofileid1 = "lgg_tcga_pan_can_atlas_2018_rna_seq_v2_mrna";
+        downloadlgg = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid1+"/molecular-data?sampleListId="+samplelistid1+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY"
+        promiselgg = makePromise(downloadlgg)
+
         promise.then(function(result){        
+
+        promiselgg.then(function(result){
+
             var JSONData = $.getJSON(downloadurl, function(data){
             var items = data;
             
@@ -3270,33 +3488,56 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
             yvalue = mrnavalue;
             //console.log(yvalue);
 
-            hovertext = GeneName + " mRNA Expression Values"
+            var JSONlgg = $.getJSON(downloadlgg, function(data){
+            var itemslgg = data;
+            
+            var mrnavaluelgg = [];
+            var sampleIDlgg = [];
 
-            var mrna= {
-                    x: xvalue,
-                    y: yvalue,
-                    mode: 'markers',
-                    type: 'bar',
-                    text: xvalue,
-                    orderby: yvalue,
-                    textposition: 'auto',
-                    hoverinfo: xvalue,                                        
-                    opacity: 0.5,
-                     marker: {
-                        color: 'rgb(158,202,225)',
-                        line: {
-                          color: 'rgb(8,48,107)',
-                          width: 1.5
-                        }
-                      }
-                };
+            for (var i = 0; i < itemslgg.length; i++) {
+                    itemlgg = itemslgg[i]; 
+                    sampleIDlgg[i] = itemlgg['sampleId'];
+                    mrnavaluelgg[i] = itemlgg['value'];                
+                   }      
 
-            var data = [mrna];
+            xvaluelgg = sampleIDlgg;
+            //console.log(xvaluelgg);            
+            yvaluelgg = mrnavaluelgg;
+            //console.log(yvaluelgg);
 
-            var layout = {title: hovertext,  xaxis: {tickangle: -45 }};
 
-            Plotly.newPlot("plotly_div", data, layout);
+            var trace1 = { 
+                x: xvalue,
+                y: yvalue,
+                name: 'Agilent microarray expression - GBM',
+                type: 'scatter',
+                transforms: [{
+                    type: 'sort',
+                    target: yvalue,
+                    order: 'ascending'
+                }]
+            };
+
+            var trace2 = {
+                x: xvaluelgg,
+                y: yvaluelgg,
+                name: 'RNASeqV2 RSEM mRNA - lgg',
+                type: 'scatter',
+                transforms: [{
+                    type: 'sort',
+                    target: yvaluelgg,
+                    order: 'ascending'
+                }]
+
+            };
+
+            var data = [trace1, trace2]            
+
+            Plotly.newPlot("plotly_div", data);
+           
+           }) 
           })
+         })
       })
                 
 };
