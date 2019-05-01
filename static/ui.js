@@ -250,22 +250,20 @@ function multi_select(ar_selected) {
         airbubble.push(obj.meta.tags['AirBubble']);        
         blood.push(obj.meta.tags['Blood']);        
         ink.push(obj.meta.tags['Ink']);                
-        
-
         samplelistid = "gbm_tcga_all";        
         molecularprofileid = "gbm_tcga_mrna"; 
-
-
+        entrezGeneId = $$("gene_options").getValue(); 
+        GeneName = $$("gene_options").getInputNode().value     
 
         //pten_3d_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink);      
         //blood_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,airbubble,blood,ink)
-        //blood_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink)  
-        mrna_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID, airbubble, blood, ink)
+        //blood_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID,airbubble,blood,ink)        
+        //mrna_combinedgeneexp_charts(samplelistid, molecularprofileid, patientID, airbubble, blood, ink)
         //mrna_multigeneexp_charts(samplelistid, molecularprofileid, sampleID,airbubble,blood,ink)            
    } )//end of slideRecords
 
-    console.log(patientID)
-
+        mrna_forpatients_charts(samplelistid, molecularprofileid, patientID, sampleID, entrezGeneId, GeneName)
+        
 }
 
 slideDataDT = {
@@ -521,12 +519,12 @@ webix.ui({
                                 label:"Various Graph Functions", 
                                 value:"1", 
                                 options:[   
-                                    {id:1, value:"blood_multigeneexp_charts"}, 
-                                    {id:2, value:"mrna_combinedgeneexp_charts"},
-                                    {id:3, value:"mrna_multigeneexp_charts"},
-                                    {id:4, value:"blood_combinedgeneexp_charts"},                                     
-                                    {id:4, value:"Mutations vs cancer diseases"}, 
-                                    {id:5, value:"mRNA expression vs cancer diseases"}                                    
+                                    {id:1, value:"bloody_nonbloody_geneexp_charts"}, 
+                                    {id:2, value:"mrna_combinedgeneexp_charts"}
+                                    // {id:3, value:"mrna_multigeneexp_charts"},
+                                    // {id:4, value:"blood_combinedgeneexp_charts"},                                     
+                                    // {id:4, value:"Mutations vs cancer diseases"}, 
+                                    // {id:5, value:"mRNA expression vs cancer diseases"}                                    
                                 ] 
                             },
                             //slidelist,                           
@@ -570,8 +568,7 @@ $$("grp_cmp_functions").attachEvent("onChange", function(newv,oldv){
     GeneName = $$("gene_options").getInputNode().value 
     grp_cmp_functions = $$("grp_cmp_functions").getInputNode().value
 
-    if (grp_cmp_functions == "mRNA Expression-lgg vs gbm"){
-        console.log("am in the mRNA group")
+    if (grp_cmp_functions == "mRNA Expression-lgg vs gbm"){        
         mrna_forgenes_charts_grouped(entrezGeneId, GeneName);            
     } else if(grp_cmp_functions == "Discrete Copy Number Alterations-lgg vs gbm"){
         console.log("am in the CNA group")
@@ -601,28 +598,23 @@ $$("graphing_functions").attachEvent("onChange", function(newv,oldv){
     genefunctions = $$("gene_functions").getInputNode().value 
     entrezGeneId = $$("gene_options").getValue();    
     GeneName = $$("gene_options").getInputNode().value
+    graphing_functions = $$("graphing_functions").getInputNode().value
 
-    if (graphing_functions == "blood_multigeneexp_charts"){
-        samplelistid = "gbm_tcga_all";        
-        molecularprofileid = "gbm_tcga_rna_seq_v2_mrna_median_Zscores";           
-        PTEN_gene='5728';
-        EGFR_gene='1956';
-        PDGFRA_gene='5156';
-        TP53_gene='7157';
-        EPHB3_gene = '2049';
-        TLR2_gene = '7097';
-        blood_multigeneexp_charts(samplelistid, molecularprofileid)
-    } else if(graphing_functions == "mrna_combinedgeneexp_charts"){
-        dis_cna_forgenes_charts(entrezGeneId, GeneName);
-    } else if(graphing_functions == "mrna_multigeneexp_charts"){
-        dis_cna_forgenes_charts(entrezGeneId, GeneName);
-    } else if(graphing_functions == "blood_combinedgeneexp_charts"){
-        dis_cna_forgenes_charts(entrezGeneId, GeneName);
-    }else if(graphing_functions == "Mutations vs cancer diseases"){
-        dis_cna_forgenes_charts(entrezGeneId, GeneName);
-    }else { 
-        mutations_forgenes_charts(entrezGeneId, GeneName);
-    }   
+    if (graphing_functions == "bloody_nonbloody_geneexp_charts"){
+        console.log("in blood")       
+        blood_mrna_exp_charts(entrezGeneId, GeneName);        
+    } 
+    // else if(graphing_functions == "mrna_combinedgeneexp_charts"){
+    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    // } else if(graphing_functions == "mrna_multigeneexp_charts"){
+    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    // } else if(graphing_functions == "blood_combinedgeneexp_charts"){
+    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    // }else if(graphing_functions == "Mutations vs cancer diseases"){
+    //     dis_cna_forgenes_charts(entrezGeneId, GeneName);
+    // }else { 
+    //     mutations_forgenes_charts(entrezGeneId, GeneName);
+    // }   
         
 });
 
@@ -3081,7 +3073,7 @@ function dis_cna_forgenes_charts(entrezGeneId, GeneName){
             var data = [{
                 type: 'bar',
                 x: xvalue,
-                y: yvalue,                
+                y: yvalue,                                
                 transforms: [{
                     type: 'groupby',
                     groups: xvalue
@@ -3094,9 +3086,11 @@ function dis_cna_forgenes_charts(entrezGeneId, GeneName){
                 bargap:0.25,
                 bargroupgap:0.1,
                 xaxis: {
-                    title: {
-                        text: 'Entrez GeneID'
-                    },
+                        title: {
+                            text: 'Entrez GeneID'
+                        },   
+                        range: [10,77000]                                        
+                        },    
                 yaxis: {
                     title: {
                         text: 'Genes CNA Values for GBM',
@@ -3105,9 +3099,8 @@ function dis_cna_forgenes_charts(entrezGeneId, GeneName){
                                 size: 18,
                                 color: '#7f7f7f'
                               }
-                      }
-                }
-                }
+                            }
+                        }                
             };
             
             Plotly.newPlot("plotly_div", data, layout);
@@ -3506,7 +3499,7 @@ function mrna_forgenes_charts(entrezGeneId, GeneName){
                 y: yvalue,                
                 transforms: [{
                     type: 'sort',
-                    groups: yvalue
+                    target: yvalue
                 }]
             }]
 
@@ -3568,8 +3561,218 @@ function mrna_forgenes_charts(entrezGeneId, GeneName){
                 
 };
 
-function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
+function mrna_forpatients_charts(samplelistid, molecularprofileid, patientID, sampleID, entrezGeneId, GeneName){ 
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_mrna";   
+        entrezGeneId = entrezGeneId;
+        GeneName = GeneName;    
+        selectedsampleID = sampleID;    
+        var mrna_exp = []               
 
+        downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/molecular-data?sampleListId="+samplelistid+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
+        promise = makePromise(downloadurl);
+
+        promise.then(function(result){        
+            var JSONData = $.getJSON(downloadurl, function(data){
+            var items = data;
+            
+            var mrnavalue = [];
+            var sampleID = [];
+            
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                        for (var j = 0; j<selectedsampleID.length; j++){    
+                            console.log(item['sampleId']);                        
+                            if (selectedsampleID[j] == item['sampleId']) {sampleID[i] = item['sampleId']};
+                            mrnavalue[i] = item['value'];                            
+                        }                    
+                }      
+
+            xvalue = sampleID;            
+            yvalue = mrnavalue; 
+
+            hovertext = GeneName + " mRNA Expression";
+
+            var data = [{
+                type: 'bar',
+                x: xvalue,
+                y: yvalue,                
+                transforms: [{
+                    type: 'sort',
+                    target: yvalue
+                }]
+            }]           
+
+            var layout = {
+                title: hovertext,
+                barmode: 'relative',
+                bargap:0.25,
+                bargroupgap:0.1,
+                xaxis: {
+                    title: {
+                        text: 'SampleID'
+                    },
+                yaxis: {
+                    title: {
+                        text: 'mRNA expression',
+                        font: {
+                                family: 'Courier New, monospace',
+                                size: 18,
+                                color: '#7f7f7f'
+                              }
+                      }
+                }
+                }
+            };
+            
+            Plotly.newPlot("plotly_div", data, layout);
+
+            // var trace1 = { 
+            //     x: xvalue,
+            //     y: yvalue,
+            //     name: 'mRNA - Scatter values',
+            //     type: 'scatter',
+            //     transforms: [{
+            //         type: 'sort',
+            //         target: yvalue,
+            //         order: 'ascending'
+            //     }]
+            // };
+
+            // var trace2 = {
+            //     x: xvalue,
+            //     y: yvalue,
+            //     name: 'mRNA - bar values',
+            //     type: 'bar',
+            //     transforms: [{
+            //         type: 'sort',
+            //         target: yvalue,
+            //         order: 'ascending'
+            //     }]
+
+            // };
+
+            // var data = [trace1, trace2]            
+
+            // Plotly.newPlot("plotly_div", data);
+          })
+      })
+                
+};
+
+function blood_mrna_exp_charts(entrezGeneId, GeneName){                
+        //all_slides = $$("slideDataview").select();
+
+        bloodyslides = all_slides.each(function(obj){ if(obj.meta.tags.Blood =="Yes") return true; })        
+        console.log(bloodyslides);
+
+        nonbloodSlides = all_slides.each(function(obj){ if(obj.meta.tags.Blood =="No") return true; })
+        console.log(nonbloodSlides);
+
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_mrna";   
+        entrezGeneId = entrezGeneId;
+        GeneName = GeneName;        
+        var mrna_exp = []
+
+        downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/molecular-data?sampleListId="+samplelistid+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
+        promise = makePromise(downloadurl);
+
+        promise.then(function(result){        
+            var JSONData = $.getJSON(downloadurl, function(data){
+            var items = data;
+            
+            var mrnavalue = [];
+            var sampleID = [];         
+            var samplenb =[];
+            var mrnavaluenb = [];   
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                        for (var j = 0; j<bloodyslides.length; j++){    
+                            console.log(item['sampleId']);                        
+                            if (bloodyslides[j] == item['sampleId']) {sampleID[i] = item['sampleId']};
+                            mrnavalue[i] = item['value'];                            
+                        }                    
+                }
+
+            xvalue = sampleID;
+            console.log(xvalue);
+            yvalue = mrnavalue;
+            console.log(yvalue);
+    
+
+            for (var i = 0; i < items.length; i++) {
+                    item = items[i]; 
+                        for (var j = 0; j<nonbloodSlides.length; j++){    
+                            console.log(item['sampleId']);                        
+                            if (nonbloodSlides[j] == item['sampleId']) {samplenb[i] = item['sampleId']};
+                            mrnavaluenb[i] = item['value'];                            
+                        }                    
+                }
+
+            samplenb = samplenb;
+            console.log(samplenb);
+            mrnavaluenb = mrnavaluenb;   
+            console.log(mrnavaluenb);
+
+            hovertext = "EntrezGeneId:" + entrezGeneId + ": GBM vs LGG - mRNA Expression";
+
+            var trace1 = { 
+                x: xvalue,
+                y: yvalue,
+                name: 'Agilent microarray mRNA expression - GBM - Blood',
+                type: 'bar',
+                transforms: [{
+                    type: 'sort',
+                    target: yvalue,
+                    order: 'ascending'
+                }]
+            };
+
+            var trace2 = {
+                x: samplenb,                
+                y: mrnavaluenb,
+                name: 'Agilent microarray mRNA expression - Non Blood',
+                type: 'bar',
+                transforms: [{
+                    type: 'sort',
+                    target: mrnavaluenb,
+                    order: 'ascending'
+                }]
+
+            };
+
+            var layout = {
+                title: hovertext,
+                xaxis: {
+                    title: {
+                        text: 'SampleID'
+                    },
+                yaxis: {
+                    title: {
+                        text: 'mRNA expression',
+                        font: {
+                                family: 'Courier New, monospace',
+                                size: 18,
+                                color: '#7f7f7f'
+                              }
+                      }
+                }
+                }
+            };
+
+
+            var data = [trace1, trace2]            
+
+            Plotly.newPlot("plotly_div", data, layout);
+           
+           }) 
+          })
+};              
+
+function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
         samplelistid = "gbm_tcga_all";        
         molecularprofileid = "gbm_tcga_mrna";   
         entrezGeneId = entrezGeneId;
@@ -3596,14 +3799,16 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
 
             for (var i = 0; i < items.length; i++) {
                     item = items[i]; 
-                    sampleID[i] = item['sampleId'];
-                    mrnavalue[i] = item['value'];                
+                    if (entrezGeneId == item['entrezGeneId']){
+                        sampleID[i] = item['sampleId'];
+                        mrnavalue[i] = item['value']; 
+                    }               
                    }      
 
             xvalue = sampleID;
-            //console.log(xvalue);            
+            console.log(xvalue);            
             yvalue = mrnavalue;
-            //console.log(yvalue);
+            console.log(yvalue);
 
             var JSONlgg = $.getJSON(downloadlgg, function(data){
             var itemslgg = data;
@@ -3613,20 +3818,22 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
 
             for (var i = 0; i < itemslgg.length; i++) {
                     itemlgg = itemslgg[i]; 
-                    sampleIDlgg[i] = itemlgg['sampleId'];
-                    mrnavaluelgg[i] = itemlgg['value'];                
+                    if(entrezGeneId == item['entrezGeneId']){
+                        sampleIDlgg[i] = itemlgg['sampleId'];
+                        mrnavaluelgg[i] = itemlgg['value'];      
+                    }          
                    }      
 
             xvaluelgg = sampleIDlgg;
             yvaluelgg = mrnavaluelgg;
 
-            hovertext = "GBM vs LGG - mRNA Expression";
+            hovertext = "EntrezGeneId:" + entrezGeneId + ": GBM vs LGG - mRNA Expression";
 
             var trace1 = { 
                 x: xvalue,
                 y: yvalue,
                 name: 'Agilent microarray mRNA expression - GBM',
-                type: 'scatter',
+                type: 'bar',
                 transforms: [{
                     type: 'sort',
                     target: yvalue,
@@ -3638,7 +3845,7 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
                 x: xvaluelgg,
                 y: yvaluelgg,
                 name: 'Agilent microarray mRNA expression - lgg',
-                type: 'scatter',
+                type: 'bar',
                 transforms: [{
                     type: 'sort',
                     target: yvaluelgg,
