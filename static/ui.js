@@ -562,11 +562,8 @@ webix.ui({
 function genename2geneid(genename){    
         var genename = genename;        
         genename_dload = "https://webservice.bridgedb.org/Human/xrefs/H/"+genename+"?dataSource=L";    
-        var xhr = webix.ajax().sync().get(genename_dload);
-        console.log(xhr.responseText);
-
+        var xhr = webix.ajax().sync().get(genename_dload);  
         var entrezGeneId = xhr.responseText.split('\t')[0];
-        console.log (entrezGeneId)     
     return entrezGeneId;                      
 }
 
@@ -3565,7 +3562,7 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
         samplelistid = "gbm_tcga_all";        
         molecularprofileid = "gbm_tcga_pan_can_atlas_2018_rna_seq_v2_mrna"; //gbm_tcga_mrna,gbm_tcga_rna_seq_v2_mrna   
         entrezGeneId = entrezGeneId;
-        GeneName = GeneName;        
+        geneName = GeneName;        
         var mrna_exp = []        
 
         downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/molecular-data?sampleListId="+samplelistid+"&entrezGeneId="+entrezGeneId+"&projection=SUMMARY";
