@@ -528,7 +528,9 @@ webix.ui({
                                 options:[   
                                     {id:1, value:"Mutations-lgg vs gbm"}, 
                                     {id:2, value:"mRNA Expression-lgg vs gbm"},
-                                    {id:3, value:"Discrete Copy Number Alterations-lgg vs gbm"}        
+                                    {id:3, value:"Multi Genes-mRNA expression, GBM"},
+                                    {id:4, value:"Multi Genes-mRNA expression, lgg vs GBM"},
+                                    {id:5, value:"Discrete Copy Number Alterations-lgg vs gbm"}        
                                 ] 
                             },
                             {   
@@ -606,7 +608,29 @@ $$("grp_cmp_functions").attachEvent("onChange", function(newv,oldv){
         var geneName = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
         entrezGeneId = genename2geneid(geneName.toUpperCase());        
         mrna_forgenes_charts_grouped(entrezGeneId,geneName);            
-    } else if(grp_cmp_functions == "Discrete Copy Number Alterations-lgg vs gbm"){ 
+    } else if(grp_cmp_functions == "Multi Genes-mRNA expression, GBM"){
+        var geneName = [];
+        var entrezGeneId = [];
+        genes = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
+        for (j=0;j<genes.length; j++){
+            geneName=genes.split(/[\s,]+/);            
+        }
+        for(k=0;k<geneName.length;k++){
+            entrezGeneId[k] = genename2geneid(geneName[k].toString().toUpperCase());    
+        }               
+        mrna_for_multigenes_gbm_grouped(entrezGeneId,geneName);
+    } else if (grp_cmp_functions == "Multi Genes-mRNA expression, lgg vs GBM"){
+        var geneName = [];
+        var entrezGeneId = [];
+        genes = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
+        for (j=0;j<genes.length; j++){
+            geneName[j]=genes.split(/[\s,]+/);
+            entrezGeneId[j] = genename2geneid(geneName[j].toUpperCase());
+        }
+        console.log(geneName);        
+        console.log(entrezGeneId);
+        mrna_for_multigenes_gbm_grouped(entrezGeneId,geneName);
+    }else if(grp_cmp_functions == "Discrete Copy Number Alterations-lgg vs gbm"){ 
         var geneName = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
         entrezGeneId = genename2geneid(geneName.toUpperCase());       
         dis_cna_forgenes_charts_grouped(entrezGeneId, geneName);
@@ -3612,29 +3636,43 @@ function mrna_forgenes_charts_grouped(entrezGeneId, GeneName){
             xvaluelgg = sampleIDlgg;
             yvaluelgg = mrnavaluelgg;
 
-            hovertext = geneName.toUpperCase() + ":GBM vs LGG-mRNA Exp (Mean & SD)";
+            hovertext = geneName.toUpperCase() + ":GBM vs LGG-mRNA Exp";
                             
             var trace1 = { 
-                x: mrnavalue,                 
-                name: 'GBM cases:'+ items.length,
+                y: mrnavalue,                
+                name: 'GBM:'+ items.length,
                 type: 'box',
                 marker: {
                     color: 'rgb(8,81,156)'
+                    //opacity: 0
                   },
-                  boxmean: 'sd'                 
+                  boxpoints: 'all'                              
             };
 
             var trace2 = {
-                x: mrnavaluelgg,
-                name: 'lgg cases:'+ itemslgg.length,
+                y: mrnavaluelgg,                
+                name: 'LGG:'+ itemslgg.length,
                 type: 'box',
                 marker: {
                     color: 'rgb(10,140,208)'
+                    //opacity: 0
                   },
-                  boxmean: 'sd'               
+                  boxpoints: 'all'
             };
 
-            var layout = {title: hovertext};
+            var layout = {title: hovertext,
+                xaxis: {
+                    title: 'Cancer types',
+                    tickangle: -45,                    
+                    zeroline: true
+                },
+                yaxis: {
+                    title: 'mRNA expression values',                    
+                    zeroline: true,
+                    tickangle: -45
+                }
+
+            };
 
 
             var data = [trace1, trace2]            
@@ -3874,4 +3912,52 @@ function mRNAcharts_allBloodNonblood(blood_selected, nb_selected, entrezGeneId){
             }) //End of Json data
 
         }) //End of Promise
+};
+
+function mrna_for_multigenes_gbm_grouped(entrezGeneId, GeneName){
+        samplelistid = "gbm_tcga_all";        
+        molecularprofileid = "gbm_tcga_pan_can_atlas_2018_rna_seq_v2_mrna"; //gbm_tcga_mrna,gbm_tcga_rna_seq_v2_mrna   
+        var entrezGeneId = entrezGeneId;
+        geneName = GeneName;        
+        var mrnavalue = [];  
+
+        for (i=0;i<entrezGeneId.length; i++){
+            //console.log(entrezGeneId[i]);
+            downloadurl = "http://www.cbioportal.org/api/molecular-profiles/"+molecularprofileid+"/molecular-data?sampleListId="+samplelistid+"&entrezGeneId="+entrezGeneId[i]+"&projection=SUMMARY";           
+            
+            var xhr1 = webix.ajax().sync().get(downloadurl);              
+            
+            var data = xhr1.responseText;
+            var items = JSON.parse(data);            
+            for (var j=0;j<items.length; j++){
+                item =items[j];
+                mrnavalue[j]=item['value'];
+                entrezGeneId[j]=item['entrezGeneId'];                
+            }              
+       } //end entrezGeneId for
+
+            xvalue = entrezGeneId;                                        
+            yvalue = mrnavalue;            
+    
+            hovertext = "mRNA Expression-Multi Genes on GBM";                           
+            
+            var trace = {                
+                x: [entrezGeneId],
+                y: [mrnavalue],
+                type: 'box',                    
+                boxpoints:'all'
+            }
+            
+            var data = [trace];
+
+            var layout = {title: hovertext,
+                xaxis: {
+                    title: 'Gene Names'
+                },
+                yaxis: {
+                    title: 'mRNA expression values'
+                }
+            };   
+
+           Plotly.newPlot("plotly_div", data, layout);  
 };
