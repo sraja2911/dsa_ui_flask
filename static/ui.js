@@ -256,20 +256,35 @@ function multi_select(ar_selected) {
         wait:300,
         buttons: {
             mutations_forpatients_charts: function(){
-                var geneName = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
-                entrezGeneId = genename2geneid(geneName.toUpperCase());
+                var genes = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
+                for (j=0;j<genes.length; j++){
+                    geneName=genes.split(/[\s,]+/);            
+                }
+                for(k=0;k<geneName.length;k++){
+                    entrezGeneId[k] = genename2geneid(geneName[k].toString().toUpperCase());    
+                }                
                 mutations_forpatients_charts(samplelistid, molecularprofileid, patientID, sampleID, entrezGeneId);
                 $(this).dialog("close");                    
             },
             mrna_expressions_forpatients_charts:function(){
-                var geneName = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
-                entrezGeneId = genename2geneid(geneName.toUpperCase());
+                var genes = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
+                for (j=0;j<genes.length; j++){
+                    geneName=genes.split(/[\s,]+/);            
+                }
+                for(k=0;k<geneName.length;k++){
+                    entrezGeneId[k] = genename2geneid(geneName[k].toString().toUpperCase());    
+                }
                 mrna_forpatients_charts(samplelistid, molecularprofileid, patientID, sampleID, entrezGeneId)
                 $(this).dialog("close");                    
             },
             cna_forpatients_charts: function(){
-                var geneName = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
-                entrezGeneId = genename2geneid(geneName.toUpperCase());
+                var genes = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
+                for (j=0;j<genes.length; j++){
+                    geneName=genes.split(/[\s,]+/);            
+                }
+                for(k=0;k<geneName.length;k++){
+                    entrezGeneId[k] = genename2geneid(geneName[k].toString().toUpperCase());    
+                }
                 dis_cna_forpatients_charts(samplelistid, molecularprofileid, patientID, sampleID, entrezGeneId)        
                 $(this).dialog("close");                    
             }
@@ -527,14 +542,24 @@ webix.ui({
                                     {id:5, value:"Discrete Copy Number Alterations-lgg vs gbm"}        
                                 ] 
                             },
+                            // {   
+                            //     view:"combo", 
+                            //     id:"graphing_functions", 
+                            //     label:"Various Graph Functions", 
+                            //     value:"1", 
+                            //     options:[   
+                            //         {id:1, value:"bloody_nonbloody_geneexp_charts"}, 
+                            //         {id:2, value:"mrna_combinedgeneexp_charts"}                                                                    
+                            //     ] 
+                            // },
                             {   
                                 view:"combo", 
-                                id:"graphing_functions", 
-                                label:"Various Graph Functions", 
+                                id:"qty_img_features", 
+                                label:"Quantitative Imaging Features", 
                                 value:"1", 
                                 options:[   
-                                    {id:1, value:"bloody_nonbloody_geneexp_charts"}, 
-                                    {id:2, value:"mrna_combinedgeneexp_charts"}                                                                    
+                                    {id:1, value:"Image RGB Color Histogram - KMeans Clustering"},
+                                    {id:2, value:"Image Co-Occurrence Matrix"}
                                 ] 
                             },                            
                             dataViewControls,
@@ -693,15 +718,14 @@ $$("graphing_functions").attachEvent("onChange", function(newv,oldv){
             var geneName = prompt("Please enter valid Gene Name", "PTEN, EGFR,TP53, PDGFRA");
             entrezGeneId = genename2geneid(geneName.toUpperCase());
 
-            $$("slideDataview").filter( function(obj) { if(obj.meta.tags.Blood =="Yes") return true;}) 
+            $$("slideDataview").filter( function(obj) { if(obj.meta.blood =="Yes") return true;}) 
             $$("slideDataview").selectAll();
             var blood_selected = $$('slideDataview').getSelectedItem(true);        
 
-            $$("slideDataview").filter( function(obj) { if(obj.meta.tags.Blood =="No") return true;}) 
+            $$("slideDataview").filter( function(obj) { if(obj.meta.blood =="No") return true;}) 
             $$("slideDataview").selectAll();
-            var nb_selected = $$('slideDataview').getSelectedItem(true);
-            
-            mRNAcharts_allBloodNonblood(blood_selected, nb_selected, entrezGeneId)
+            var nb_selected = $$('slideDataview').getSelectedItem(true);            
+            mRNA_bloodvsnonblood_charts(entrezGeneId, geneName);
     }
 });
 
